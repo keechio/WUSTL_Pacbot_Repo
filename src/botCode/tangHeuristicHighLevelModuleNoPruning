@@ -9,7 +9,6 @@ from grid import grid
 from search import bfs
 from messages import MsgType, message_buffers, LightState, PacmanCommand
 
-
 ADDRESS = os.environ.get("LOCAL_ADDRESS", "localhost")
 PORT = os.environ.get("LOCAL_PORT", 11295)
 
@@ -36,27 +35,16 @@ class HeuristicHighLevelModule(rm.ProtoModule):
 
         # p_loc[0] = x pos , p_loc[1] = y loc
         # self.state.red_ghost. x,y,state(frightened or not)
-    def pac_find_possible_moves(self, cur_loc, grid):
-        (x, y) = self.pos['next']
-        possible = []
-        if self.pac_is_move_legal((x + 1, y), grid):
-            possible.append((x + 1, y))
-        if self.pac_is_move_legal((x, y + 1), grid):
-            possible.append((x, y + 1))
-        if self.pac_is_move_legal((x - 1, y), grid):
-            possible.append((x - 1, y))
-        if self.pac_is_move_legal((x, y - 1), grid):
-            possible.append((x, y - 1))
-        possible.append(cur_loc)
-        return possible
 
     def pac_get_legal_moves(self, moves, grid):
         return_moves = []
         for move in moves:
             if grid[move[0]][move[1]] != I and grid[move[0]][move[1]] != n:
                 return_moves.append(move)
-        return  move
+        return move
+
     def maxVal(self, p_loc, ghosts, grid, score, depth):
+
         maxEva = float('-inf')
         prev_loc = p_loc
         state = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1),
@@ -66,27 +54,24 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         for p_loc in moves:
             new_grid = copy.deepcopy(grid);
             score += (self.getScorePosition(p_loc, new_grid) - 1)
-            maxEva = max(score, self.minVal(p_loc, ghosts, new_grid, score, prev_loc, depth))
+            maxEva = max(maxEva, self.minVal(p_loc, ghosts, new_grid, score, prev_loc, depth))
         return maxEva
-
-
 
     def minVal(self, p_loc, ghosts, grid, score, prev_loc, depth):
         minEva = float('inf')
+
         if p_loc in ghosts:
             return score
-
-        new_ghosts = [self._get_next_blue_chase_move()]
-        for ind, ghost_loc in enumerate(ghosts):
-            moves = self._get_move_based_on_target(p_loc, prev_loc, ghost_loc, grid)
-
-                new_ghosts[ind] = move
-                minEva = min(score, self.maxVal(p_loc, new_ghosts, grid, score, depth))
+        new_ghosts = [self._get_next_blue_chase_move(p_loc, prev_loc, ghosts[0], grid),
+                      self._get_next_red_chase_move(p_loc, prev_loc, ghosts[1], grid),
+                      self._get_next_orange_chase_move(p_loc, prev_loc, ghosts[2], grid),
+                      self._get_next_pink_chase_move(p_loc, prev_loc, ghosts[3], grid)]
+        minEva = min(minEva, self.maxVal(p_loc, new_ghosts, grid, score, depth))
         return minEva
 
     def minMaxAction(self, p_loc):
         state = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1),
-                   (p_loc[0], p_loc[1] + 1)]
+                 (p_loc[0], p_loc[1] + 1)]
         red_ghost = (self.state.red_ghost.x, self.state.red_ghost.y)
         blue_ghost = (self.state.blue_ghost.x, self.state.blue_ghost.y)
         orange_ghost = (self.state.orange_ghost.x, self.state.orange_ghost.y)
@@ -187,40 +172,62 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 return
         self._send_stop_command()
 
+    # This is awful. Look online to find out blue is supposed to move, and let's just work under the
+    # assumption that this function returns that sort of move.
+    def _get_next_blue_chase_move(self, p_loc, prev_loc, red_pos, grid):
+        pacbot_target = (0, 0)
+        if self._get_direction(p_loc, prev_loc) == up:
+            pacbot_target = (
+                p_loc[0] - 2, p_loc[1] + 2)
+        elif self._get_direction(p_loc, prev_loc,) == down:
+            pacbot_target = (
+                p_loc[0], p_loc[1] - 2)
+        elif self._get_direction(p_loc, prev_loc,) == left:
+            pacbot_target = (
+                p_loc[0] - 2, p_loc[1])
+        elif self._get_direction(p_loc, prev_loc,) == right:
+            pacbot_target = (
+                p_loc[0] + 2, p_loc[1])
+        x = pacbot_target[0] + (pacbot_target[0] -
+                                red_pos.x)
+        y = pacbot_target[1] + (pacbot_target[1] -
+                                red_pos.y)
+
+        return self._get_move_based_on_target((x, y), red_pos, grid)
 
     # Return the move closest to the space 4 tiles ahead of Pacman in the direction
     # Pacman is currently facing. If Pacman is facing up, then we replicate a bug in
     # the original game and return the move closest to the space 4 tiles above and
     # 4 tiles to the left of Pacman.
-    def _get_next_pink_chase_move(self, p_loc, pink_loc, grid):
+    def _get_next_pink_chase_move(self, p_loc, prev_loc, pink_loc, grid):
         (x, y) = (0, 0)
 
-        if self._get_direction(p_loc) == up:
+        if self._get_direction(p_loc, prev_loc,) == up:
             x = p_loc[0] - 4
             y = p_loc[1] + 4
-        elif self._get_direction(p_loc) == down:
+        elif self._get_direction(p_loc, prev_loc,) == down:
             x = p_loc[0]
             y = p_loc[1] - 4
-        elif self._get_direction(p_loc) == left:
+        elif self._get_direction(p_loc, prev_loc,) == left:
             x = p_loc[0] - 4
             y = p_loc[1]
-        elif self._get_direction(p_loc) == right:
+        elif self._get_direction(p_loc, prev_loc,) == right:
             x = p_loc[0] + 4
             y = p_loc[1]
 
-        return self._get_move_based_on_target((x, y), pink_loc, grid)
+        return self._get_move_based_on_target((x, y), pink_loc, prev_loc, grid)
 
     # Returns the move that will bring the ghost closest to Pacman
-    def _get_next_red_chase_move(self, p_loc, red_loc, grid):
-        return self._get_move_based_on_target(p_loc, red_loc, grid)
+    def _get_next_red_chase_move(self, p_loc, prev_loc, red_loc, grid):
+        return self._get_move_based_on_target(p_loc, prev_loc, red_loc, grid)
 
     # If the ghost is close to Pacman, return the move that will bring the ghost closest
     # to its scatter position (bottom left corner). If the ghost is far from Pacman,
     # return the move that will bring the ghost closest to Pacman.
-    def _get_next_orange_chase_move(self, p_loc, orange_loc, grid):
+    def _get_next_orange_chase_move(self, p_loc, prev_loc, orange_loc, grid):
         if self._get_euclidian_distance(orange_loc, p_loc) < 8:
-            return self._get_move_based_on_target((0, -1), orange_loc, grid)
-        return self._get_move_based_on_target(p_loc)
+            return self._get_move_based_on_target((0, -1), prev_loc, orange_loc, grid)
+        return self._get_move_based_on_target(p_loc, prev_loc, orange_loc, grid)
 
     # Moves to the tile that is the closest to the target by straight-line distance,
     # NOT the tile that is the closest to the target by optimal tile path length.
@@ -234,34 +241,31 @@ class HeuristicHighLevelModule(rm.ProtoModule):
 
         return (possible[index], self._get_direction(self.pos["next"], possible[index]))
 
-# Returns the straight-line distance between two points.
+    # Returns the straight-line distance between two points.
     def _get_euclidian_distance(self, pos_a, pos_b):
-        return math.hypot(int(pos_a[0])-int(pos_b[0]), int(pos_a[1])-int(pos_b[1]))
+        return math.hypot(int(pos_a[0]) - int(pos_b[0]), int(pos_a[1]) - int(pos_b[1]))
 
-
-# Returns a list of valid tiles for the ghost to move to. If no such tiles exist,
+    # Returns a list of valid tiles for the ghost to move to. If no such tiles exist,
     # return a list containing only the ghost's current position.
     def _find_possible_moves(self, cur_loc, grid):
         (x, y) = self.pos['next']
         possible = []
-        if self._is_move_legal((x+1, y), grid, cur_loc):
-            possible.append((x+1, y))
-        if self._is_move_legal((x, y+1), grid, cur_loc):
-            possible.append((x, y+1))
-        if self._is_move_legal((x-1, y), grid, cur_loc):
-            possible.append((x-1, y))
-        if self._is_move_legal((x, y-1), grid, cur_loc):
-            possible.append((x, y-1))
+        if self._is_move_legal((x + 1, y), grid, cur_loc):
+            possible.append((x + 1, y))
+        if self._is_move_legal((x, y + 1), grid, cur_loc):
+            possible.append((x, y + 1))
+        if self._is_move_legal((x - 1, y), grid, cur_loc):
+            possible.append((x - 1, y))
+        if self._is_move_legal((x, y - 1), grid, cur_loc):
+            possible.append((x, y - 1))
         if possible == []:
-            possible.append(self.pos["current"])
+            possible.append(cur_loc)
         return possible
 
     def _is_move_legal(self, move, grid, cur_loc):
         return (move != (cur_loc.x, cur_loc.y) and
                 grid[move[0]][move[1]] != I and
                 grid[move[0]][move[1]] != n)
-
-
 
 
 def main():
