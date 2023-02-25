@@ -56,35 +56,33 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             if grid[move[0]][move[1]] != I and grid[move[0]][move[1]] != n:
                 return_moves.append(move)
         return  move
-    def maxVal(self, p_loc, ghosts, grid, score, alpha, beta, depth):
+    def maxVal(self, p_loc, ghosts, grid, score, depth):
+        maxEva = float('-inf')
         prev_loc = p_loc
         state = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1),
                  (p_loc[0], p_loc[1] + 1)]
-        v = float('-inf')
+
         moves = self.pac_get_legal_moves(state, grid)
         for p_loc in moves:
             new_grid = copy.deepcopy(grid);
             score += (self.getScorePosition(p_loc, new_grid) - 1)
-            v = max(v, self.minVal(p_loc, ghosts, new_grid, score, prev_loc, alpha, beta, depth))
-            alpha = max(alpha, v)
-            if alpha >= beta:
-                return v
-        return v
+            maxEva = max(score, self.minVal(p_loc, ghosts, new_grid, score, prev_loc, depth))
+        return maxEva
 
-    def minVal(self, p_loc, ghosts, grid, score, prev_loc, alpha, beta, depth):
-        v = float('inf')
-        if(p_loc in ghosts):
+
+
+    def minVal(self, p_loc, ghosts, grid, score, prev_loc, depth):
+        minEva = float('inf')
+        if p_loc in ghosts:
             return score
-        for ind,ghost_loc in enumerate(ghosts):
+
+        new_ghosts = [self._get_next_blue_chase_move()]
+        for ind, ghost_loc in enumerate(ghosts):
             moves = self._get_move_based_on_target(p_loc, prev_loc, ghost_loc, grid)
-            for move in moves:
-                new_ghosts = copy.copy(ghosts)
+
                 new_ghosts[ind] = move
-                v = min(v, self.maxVal(p_loc, new_ghosts, grid, score, alpha, beta, depth))
-                beta = min(beta, v)
-                if alpha >= beta:
-                    return score
-        return score
+                minEva = min(score, self.maxVal(p_loc, new_ghosts, grid, score, depth))
+        return minEva
 
     def minMaxAction(self, p_loc):
         state = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1),
@@ -189,28 +187,6 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 return
         self._send_stop_command()
 
-# This is awful. Look online to find out blue is supposed to move, and let's just work under the
-    # assumption that this function returns that sort of move.
-    def _get_next_blue_chase_move(self, p_loc, red_pos, grid):
-        pacbot_target = (0, 0)
-        if self._get_direction(p_loc) == up:
-            pacbot_target = (
-                p_loc[0] - 2, p_loc[1] + 2)
-        elif self._get_direction(p_loc) == down:
-            pacbot_target = (
-                p_loc[0], p_loc[1] - 2)
-        elif self._get_direction(p_loc) == left:
-            pacbot_target = (
-                p_loc[0] - 2, p_loc[1])
-        elif self._get_direction(p_loc) == right:
-            pacbot_target = (
-                p_loc[0] + 2, p_loc[1])
-        x = pacbot_target[0] + (pacbot_target[0] -
-                                red_pos.x)
-        y = pacbot_target[1] + (pacbot_target[1] -
-                                red_pos.y)
-
-        return self._get_move_based_on_target((x, y), red_pos, grid)
 
     # Return the move closest to the space 4 tiles ahead of Pacman in the direction
     # Pacman is currently facing. If Pacman is facing up, then we replicate a bug in
