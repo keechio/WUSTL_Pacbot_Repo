@@ -26,6 +26,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         self.direction = PacmanCommand.EAST
         self.grid = copy.deepcopy(grid)
 
+        #p_loc[0] = x pos , p_loc[1] = y loc
+        #ghost.state.red_ghost. x,y,state(frightened or not)
     def _get_direction(self, p_loc, next_loc):
         if p_loc[0] == next_loc[0]:
             if p_loc[1] < next_loc[1]:
@@ -66,39 +68,6 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     def _get_target_with_min_turning_direction(self, mins):
         turns = [(self._get_num_turns(self.direction, direct), targ) for direct, targ in mins]
         return min(turns, key=itemgetter(0))[1]
-
-    def maxVal(self, state, alpha, beta):
-        v = float('-inf')
-        for successor in state:
-            v = max(v, minVal(successor))
-            alpha = max(alpha, v)
-            if alpha >= beta:
-                return v
-        return v
-            
-    
-    def minVal(self, state, alpha, beta):
-        v = float('inf')
-        for successor in state:
-            v = min(v, maxVal(successor))
-            beta = min(beta, v)
-            if alpha >= beta:
-                return v
-        return v
-        
-    def minMaxAction(self, state):
-        #state gives a list of actions
-        #if (game ended):
-            # return
-        returning = float('-inf')
-        bestAction = None 
-        for action in state:
-            maxv = minV(action)
-            if maxv>returning:
-                bestAction = action
-                returning = maxv
-        return bestAction
-    
     
     def _find_best_target(self, p_loc):
         targets = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1), (p_loc[0], p_loc[1] + 1)]
