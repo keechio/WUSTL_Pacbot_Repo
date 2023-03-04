@@ -11,16 +11,12 @@ import time
 FREQUENCY = game_frequency * ticks_per_update
 
 class GameState:
-    def __init__(self):
-        self.pacbot = PacBot()
-        self.red = GhostAgent(red_init_pos[0], red_init_pos[1], red_init_npos[0],
-                              red_init_npos[1], red, red_init_dir, self, [], red_scatter_pos)
-        self.pink = GhostAgent(pink_init_pos[0], pink_init_pos[1], pink_init_npos[0],
-                               pink_init_npos[1], pink, pink_init_dir, self, pink_start_path, pink_scatter_pos)
-        self.orange = GhostAgent(orange_init_pos[0], orange_init_pos[1], orange_init_npos[0],
-                                 orange_init_npos[1], orange, red_init_dir, self, orange_start_path, orange_scatter_pos)
-        self.blue = GhostAgent(blue_init_pos[0], blue_init_pos[1], blue_init_npos[0],
-                               blue_init_npos[1], blue, blue_init_dir, self, blue_start_path, blue_scatter_pos)
+    def __init__(self, pacbot, ghost_agents):
+        self.pacbot = pacbot
+        self.red = ghost_agents[0]
+        self.pink = ghost_agents[1]
+        self.orange = ghost_agents[2]
+        self.blue = ghost_agents[3]
         self.just_swapped_state = False
         self.restart()
         self.ticks_since_spawn = 0

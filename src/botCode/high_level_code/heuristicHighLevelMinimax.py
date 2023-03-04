@@ -25,14 +25,6 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         self.direction = PacmanCommand.EAST
         self.grid = copy.deepcopy(grid)
 
-    def getScorePosition(self, new_pos, grid):
-        if grid[new_pos[0]][new_pos[1]] == o:
-            grid[new_pos[0]][new_pos[1]] = e
-            return 10
-        if grid[new_pos[0]][new_pos[1]] == O:
-            grid[new_pos[0]][new_pos[1]] = e
-            return 50
-
         # p_loc[0] = x pos , p_loc[1] = y loc
         # self.state.red_ghost. x,y,state(frightened or not)
     def pac_find_possible_moves(self, cur_loc, grid):
