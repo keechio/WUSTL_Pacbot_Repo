@@ -241,7 +241,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         if self.state and self.state.mode == LightState.RUNNING:
             self._update_game_state()
             self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
-            next_loc = self.minMaxAction()
+            next_loc = self.minMaxActionAB()
             if next_loc != self.pacbot.pos:
                 self._send_command_message_to_target(next_loc)
                 return
