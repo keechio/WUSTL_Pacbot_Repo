@@ -131,7 +131,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         for move in moves:
             new_gameState = copy.deepcopy(gameState)
             new_gameState.pacbot.pos = move
-            v = max(v, self.minVal(new_gameState, depth))
+            v = max(v, self.minValAB(new_gameState, depth, alpha, beta))
             if v >= beta:
                 return v
             alpha = max(alpha, v)
@@ -149,7 +149,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             return gameState.score
         if gameState._should_die():
             return gameState.score
-        v = min(v, self.maxVal(gameState, depth + 1))
+        v = min(v, self.maxValAB(gameState, depth + 1, alpha, beta))
         if v <= alpha:
             return v
         beta = min(beta, v)
