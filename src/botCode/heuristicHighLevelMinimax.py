@@ -122,8 +122,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     def maxValAB(self, gameState, depth, alpha, beta):
         if depth > MAX_DEPTH:
             return gameState.score
-        v = 
-        float('-inf')
+        v = float('-inf')
         prev_loc = gameState.pacbot.pos
         state = [(prev_loc[0] - 1, prev_loc[1]), (prev_loc[0] + 1, prev_loc[1]),
                  (prev_loc[0], prev_loc[1] - 1),
