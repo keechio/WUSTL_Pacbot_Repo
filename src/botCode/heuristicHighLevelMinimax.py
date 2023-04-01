@@ -152,7 +152,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         v = min(v, self.maxVal(gameState, depth + 1))
         if v <= alpha:
             return v
-        alpha = min(beta, v)
+        beta = min(beta, v)
         return v
 
     """
