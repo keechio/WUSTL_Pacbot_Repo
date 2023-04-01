@@ -113,6 +113,77 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 returning = maxv
         return best_action
 
+    """
+    max step in minimax
+    makes pacman move in each possible direction then calls min step
+    returns score if it hits a ghost
+    """
+
+    def maxValAB(self, gameState, depth, alpha, beta):
+        if depth > MAX_DEPTH:
+            return gameState.score
+        v = 
+        float('-inf')
+        prev_loc = gameState.pacbot.pos
+        state = [(prev_loc[0] - 1, prev_loc[1]), (prev_loc[0] + 1, prev_loc[1]),
+                 (prev_loc[0], prev_loc[1] - 1),
+                 (prev_loc[0], prev_loc[1] + 1)]
+        moves = self.pac_get_legal_moves(state, gameState.grid)
+        for move in moves:
+            new_gameState = copy.deepcopy(gameState)
+            new_gameState.pacbot.pos = move
+            v = max(v, self.minVal(new_gameState, depth))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
+
+    """
+    min step in minimax
+    makes each ghost move according to algorithm then calls max step
+    returns score if it hits a ghost
+    """
+
+    def minValAB(self, gameState, depth, alpha, beta):
+        v = float('inf')
+        if gameState.next_step():
+            return gameState.score
+        if gameState._should_die():
+            return gameState.score
+        v = min(v, self.maxVal(gameState, depth + 1))
+        if v <= alpha:
+            return v
+        alpha = min(beta, v)
+        return v
+
+    """
+    function calls min step to start the minmax tree
+    """
+
+    def minMaxActionAB(self):
+        # state gives a list of actions
+        # if (game ended):
+        # return
+        returning = float('-inf')
+        best_action = None
+        prev_loc = self.gameState.pacbot.pos
+        state = [(prev_loc[0] - 1, prev_loc[1]), (prev_loc[0] + 1, prev_loc[1]),
+                 (prev_loc[0], prev_loc[1] - 1),
+                 (prev_loc[0], prev_loc[1] + 1)]
+        moves = self.pac_get_legal_moves(state, self.gameState.grid)
+        for move in moves:
+            new_gamestate = copy.deepcopy(self.gameState)
+            new_gamestate.pacbot.pos = move
+            maxv = float('-inf')
+            if new_gamestate._should_die():
+                maxv = new_gamestate.score
+            else:
+                maxv = self.minValAB(new_gamestate, 0, float('-inf'), float('inf'))
+            if maxv > returning:
+                best_action = move
+                returning = maxv
+        return best_action
+
     def _target_is_invalid(self, target_loc):
         return self.gameState.grid[target_loc[0]][target_loc[1]] in [I, n]
 
