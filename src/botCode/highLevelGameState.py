@@ -1,8 +1,8 @@
-from .highLevelVariables import *
-from .highLevelGhostpaths import *
-from .highLevelGhostAgent import *
-from .highLevelPacbot import *
-from .grid import grid
+from highLevelVariables import *
+from highLevelGhostpaths import *
+from highLevelGhostAgent import *
+from highLevelPacbot import *
+from grid import grid
 import copy
 import time
 
@@ -10,13 +10,19 @@ import time
 
 FREQUENCY = game_frequency * ticks_per_update
 
-class GameState:
-    def __init__(self, pacbot, ghost_agents):
+class HighLevelGameState:
+    def __init__(self, pacbot, gs_grid):
+        self.grid = gs_grid
         self.pacbot = pacbot
-        self.red = ghost_agents[0]
-        self.pink = ghost_agents[1]
-        self.orange = ghost_agents[2]
-        self.blue = ghost_agents[3]
+        self.red = HighLevelGhostAgent(red_init_pos[0], red_init_pos[1], red_init_npos[0],
+                                       red_init_npos[1], red, red_init_dir, self, [], red_scatter_pos)
+        self.pink = HighLevelGhostAgent(pink_init_pos[0], pink_init_pos[1], pink_init_npos[0],
+                                        pink_init_npos[1], pink, pink_init_dir, self, pink_start_path, pink_scatter_pos)
+        self.orange = HighLevelGhostAgent(orange_init_pos[0], orange_init_pos[1], orange_init_npos[0],
+                                          orange_init_npos[1], orange, red_init_dir, self, orange_start_path,
+                                          orange_scatter_pos)
+        self.blue = HighLevelGhostAgent(blue_init_pos[0], blue_init_pos[1], blue_init_npos[0],
+                                        blue_init_npos[1], blue, blue_init_dir, self, blue_start_path, blue_scatter_pos)
         self.just_swapped_state = False
         self.restart()
         self.ticks_since_spawn = 0
@@ -215,9 +221,9 @@ class GameState:
 
     def next_step(self):
         if self._is_game_over():
-            self._end_game()
+            return 1
         if self._should_die():
-            self._die()
+            return 1
         else:
             self._check_if_ghosts_eaten()
             if self.update_ticks % ticks_per_update == 0:
@@ -242,10 +248,10 @@ class GameState:
             if self._should_remove_cherry():
                 self._despawn_cherry()
             self.update_ticks += 1
+            return 0
 
     # Sets the game back to its original state (no rounds played).
     def restart(self):
-        self.grid = copy.deepcopy(grid)
         self.pellets = sum([col.count(o) for col in self.grid])
         self.power_pellets = sum([col.count(O) for col in self.grid])
         self.cherry = False

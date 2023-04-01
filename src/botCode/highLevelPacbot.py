@@ -1,11 +1,15 @@
-from .highLevelVariables import *
+from highLevelVariables import *
 
-class PacBot:
+
+class HighLevelPacBot:
     """
         Allows initializing and updating information about PacBot
     """
+
     def __init__(self):
-        self.respawn()
+        self.pos = pacbot_starting_pos
+        self.direction = pacbot_starting_dir
+        # self.respawn()
 
     def respawn(self):
         self.pos = pacbot_starting_pos

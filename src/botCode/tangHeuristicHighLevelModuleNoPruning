@@ -44,7 +44,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         return move
 
     def maxVal(self, p_loc, ghosts, grid, score, depth):
-
+        if(depth < 1):
+            return score
         maxEva = float('-inf')
         prev_loc = p_loc
         state = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1),
@@ -57,7 +58,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             maxEva = max(maxEva, self.minVal(p_loc, ghosts, new_grid, score, prev_loc, depth))
         return maxEva
 
-    def minVal(self, p_loc, ghosts, grid, score, prev_loc, depth):
+    def minVal(self, p_loc, ghosts, grid, score, prev_loc, depth-1):
         minEva = float('inf')
 
         if p_loc in ghosts:
@@ -83,7 +84,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         returning = float('-inf')
         best_action = None
         for p_loc in state:
-            maxv = self.minVal(p_loc, ghosts_loc, copy.deepcopy(self.grid))
+            maxv = self.minVal(p_loc, ghosts_loc, copy.deepcopy(self.grid), 0, p_loc, 10)
             if maxv > returning:
                 best_action = p_loc
                 returning = maxv

@@ -1,10 +1,10 @@
-from .ghostpaths import *
-from .variables import *
+from highLevelGhostpaths import *
+from highLevelVariables import *
 import random
 import math
 
 
-class GhostAgent:
+class HighLevelGhostAgent:
 
     def __init__(self, x1, y1, x2, y2, color, direction, game_state, start_path, scatter_pos):
         # The color of the ghost determines its movement behavior.
