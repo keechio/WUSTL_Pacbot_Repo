@@ -15,7 +15,7 @@ from highLevelGameState import *
 
 ADDRESS = os.environ.get("LOCAL_ADDRESS", "localhost")
 PORT = os.environ.get("LOCAL_PORT", 11295)
-
+PELLET_WEIGHT = 0.65
 FREQUENCY = 30
 GHOST_CUTOFF = 10
 MAX_DEPTH = 5
@@ -203,7 +203,57 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     def _get_target_with_min_turning_direction(self, mins):
         turns = [(self._get_num_turns(self.direction, direct), targ) for direct, targ in mins]
         return min(turns, key=itemgetter(0))[1]
+    
+    def manhattan_distance(self, curr_loc, next_loc):
+        distance = abs(next_loc[0]-curr_loc[0])+abs(next_loc[1]-curr_loc[1])
+        return distance
+    
+    def _find_best_target(self, p_loc):
+        targets = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1), (p_loc[0], p_loc[1] + 1)]
+        directions =  [PacmanCommand.STOP, PacmanCommand.WEST, PacmanCommand.EAST, PacmanCommand.SOUTH, PacmanCommand.NORTH]
+        heuristics = []
+        for target_loc in targets:
+            if self._target_is_invalid(target_loc):
+                heuristics.append(float('inf'))
+                continue
+            dist_to_pellet = self._find_distance_of_closest_pellet(target_loc)
+            paths_to_ghosts = self._find_paths_to_closest_ghosts(target_loc)
 
+
+            closest_ghost = (None, float('inf'))
+            ghosts = []
+            for state, path in paths_to_ghosts:
+                dist = len(path) - 1
+                closest_ghost = (state, dist) if dist < closest_ghost[1] else closest_ghost
+                ghosts.append((state, dist))
+                if self._is_power_pellet_closer(path):
+                    if target_loc == p_loc:
+                        return path[1]
+                    else:
+                        return path[0]
+
+            ghost_heuristic = 0
+            for state, dist in ghosts:
+                if dist < GHOST_CUTOFF:
+                    if state == LightState.NORMAL:
+                        ghost_heuristic += pow((GHOST_CUTOFF - closest_ghost[1]), 2) * GHOST_WEIGHT
+                    else:
+                        ghost_heuristic += pow((GHOST_CUTOFF - closest_ghost[1]), 2) * -1 * FRIGHTENED_GHOST_WEIGHT
+
+            pellet_heuristic = dist_to_pellet * PELLET_WEIGHT
+            heuristics.append(ghost_heuristic + pellet_heuristic)
+        # print(heuristics)
+        mins = []
+        min_heur = float('inf')
+        for i, heur in enumerate(heuristics):
+            if heur < min_heur:
+                min_heur = heur
+                mins = [(directions[i], targets[i])]
+            elif heur == min_heur:
+                mins.append((directions[i], targets[i]))
+        return self._get_target_with_min_turning_direction(mins)
+    
+    
     def _update_game_state(self):
         self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
         if self.gameState.grid[self.pacbot.pos[0]][self.pacbot.pos[1]] in [o, O]:
