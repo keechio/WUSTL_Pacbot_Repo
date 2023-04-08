@@ -37,9 +37,9 @@ while True:
 
     gyro_angle = gyro.get_z_cumulative()
 
-    range0 = dis0.range
-    range1 = dis1.range
-    range2 = dis2.range
+    range0 = dis0.range # left sensor
+    range1 = dis1.range # front sensor
+    range2 = dis2.range # right sensor
 
     # Scale the range readings to fit within a 40-character width
     width = 40
@@ -89,7 +89,7 @@ while True:
         gyro.reset()
         gyro_angle = 0
 
-
+    # if wall is detected, stop and wait for user/server command
     if range1 < 120:
         motor.stop()
         print("WALL! STOP")
@@ -106,7 +106,61 @@ while True:
             print("T TURN")
 
         # wait for user/server command
-        
+        command = input("Enter command: ")
+        if command == "a":
+            # left
+            motor.spin_left(0.1, 90)
+        elif command == "d":
+            # right
+            motor.spin_right(0.1, 90)
+        elif command == "r":
+            # turn & reverse
+            motor.spin_right(0.1, 180)
+
+        motor.drive(0.2, 0.2)
+        time.sleep(0.5)
+        gyro.reset()
+        gyro_angle = 0
+    
+    # if at intersection, stop and wait for user/server command
+    if (range0 > 200 or range2 > 200) and range1 > 400:
+        motor.drive(0.2, 0.2)
+        time.sleep(0.65)
+        motor.stop()
+        print("INTERSECTION! STOP")
+        # motor.drive(0.2, 0.2, False)
+        # print("BACKING UP")
+        time.sleep(1)
+        if range0 < range2:
+            print("OK TO GO RIGHT")
+            # motor.spin_right(0.1, 90)
+        elif range0 > range2:
+            print("OK TO GO LEFT")
+            # motor.spin_left(0.1, 90)
+        elif range0 > 200 and range2 > 200:
+            print("X CROSSING")
+
+        # wait for user/server command
+        command = input("Enter command: ")
+        if command == "a":
+            # left
+            motor.spin_left(0.1, 90)
+        elif command == "d":
+            # right
+            motor.spin_right(0.1, 90)
+        elif command == "r":
+            # turn & reverse
+            motor.spin_right(0.1, 180)
+        elif command == "w":
+            # go straight
+            print("ahhahaah")
+
+            
+        motor.drive(0.2, 0.2)
+        time.sleep(0.5)
+        gyro.reset()
+        gyro_angle = 0
+
 
 
 
