@@ -1,7 +1,7 @@
 import time
 import board
-from motorControl import motorControl
-from gyro import Gyro
+from lib.motorControl import motorControl
+from lib.gyro import Gyro
 from gpiozero import DistanceSensor
 
 i2c = board.I2C()

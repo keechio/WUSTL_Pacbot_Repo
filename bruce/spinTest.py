@@ -1,8 +1,7 @@
 import time
 import board
 import adafruit_fxas21002c
-from motorControl import motorControl
-from simple_pid import PID
+from lib.motorControl import motorControl
 
 i2c = board.I2C()
 sensor = adafruit_fxas21002c.FXAS21002C(i2c)
@@ -11,10 +10,6 @@ motor = motorControl()
 
 gyro_z_cumulative = 0
 
-while True:
-    motor.drive(1, 1)
-
-exit()
 
 while True:
     gyro_x, gyro_y, gyro_z = sensor.gyroscope

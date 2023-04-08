@@ -1,12 +1,10 @@
 # Importing modules and classes
 import time
-import numpy as np
 from gpiozero import RotaryEncoder
 from motorControl import motorControl
 
 inA = 17
 inB = 27
-pwmA = 22
 
 # Assigning parameter values
 ppr = 260  # Pulses Per Revolution of the encoder

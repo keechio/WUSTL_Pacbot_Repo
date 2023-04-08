@@ -2,7 +2,7 @@
 import time
 import numpy as np
 from gpiozero import RotaryEncoder
-from motorControl import motorControl
+from bruce.lib.motorControl import motorControl
 from gpiozero import PWMOutputDevice as PWM
 
 inA = 17
