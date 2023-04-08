@@ -1,0 +1,1 @@
+Not sure if the current imported adafruit library is the right one. Keeping this folder for now.
