@@ -59,19 +59,38 @@ while True:
 
         # go st
         # raight when gyro_z_cumulative is 0
-    delta = 0.05
+    delta = 0.03
     rangeDiff = range0 - range2
-    print(rangeDiff)
-    if gyro_angle < -1:
+    print(gyro_angle)
+    if gyro_angle < -2:
     # if rangeDiff > 20:
         motor.drive(0.2, 0.2 - delta)
-    elif gyro_angle > 1:
+    elif gyro_angle > 2:
     # elif rangeDiff < -20:
         motor.drive(0.2 - delta, 0.2)
     else:
         motor.drive(0.2, 0.2)
 
-    if range1 < 150:
+    if range2 < 60:
+        motor.stop()
+        
+        motor.drive(0, 0.2, direction=False)
+        time.sleep(0.15)
+        motor.drive(0.2, 0.2)
+        time.sleep(0.15)
+        gyro.reset()
+        gyro_angle = 0
+    elif range0 < 60:
+        motor.stop()
+        motor.drive(0.2, 0, direction=False)
+        time.sleep(0.15)
+        motor.drive(0.2, 0.2)
+        time.sleep(0.15)
+        gyro.reset()
+        gyro_angle = 0
+
+
+    if range1 < 120:
         motor.stop()
         print("WALL! STOP")
         # motor.drive(0.2, 0.2, False)
