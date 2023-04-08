@@ -97,11 +97,16 @@ while True:
         # print("BACKING UP")
         time.sleep(1)
         if range0 < range2:
-            print("RIGHT HAS SPACE, GO RIGHT")
-            motor.spin_right(0.1, 90)
-        else:
-            print("LEFT HAS SPACE, GO LEFT")
-            motor.spin_left(0.1, 90)
+            print("OK TO GO RIGHT")
+            # motor.spin_right(0.1, 90)
+        elif range0 > range2:
+            print("OK TO GO LEFT")
+            # motor.spin_left(0.1, 90)
+        elif range0 > 200 and range2 > 200:
+            print("T TURN")
+
+        # wait for user/server command
+        
 
 
 
