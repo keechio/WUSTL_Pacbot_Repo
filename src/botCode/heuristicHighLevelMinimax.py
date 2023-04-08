@@ -208,6 +208,19 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         distance = abs(next_loc[0]-curr_loc[0])+abs(next_loc[1]-curr_loc[1])
         return distance
     
+    def closest_ghost(self, paths_to_ghosts, target_loc, p_loc):
+        closest_ghost = (None, float('inf'))
+        ghosts = []
+        for state, path in paths_to_ghosts:
+            dist = len(path) - 1
+            closest_ghost = (state, dist) if dist < closest_ghost[1] else closest_ghost
+            ghosts.append((state, dist))
+            if self._is_power_pellet_closer(path):
+                if target_loc == p_loc:
+                    return path[1]
+                else:
+                    return path[0]
+        
     def _find_best_target(self, p_loc):
         targets = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1), (p_loc[0], p_loc[1] + 1)]
         directions =  [PacmanCommand.STOP, PacmanCommand.WEST, PacmanCommand.EAST, PacmanCommand.SOUTH, PacmanCommand.NORTH]
