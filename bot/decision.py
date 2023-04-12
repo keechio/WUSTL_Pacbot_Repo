@@ -1,7 +1,7 @@
 # TODO: add reverse command in running state
 #       use new sensor to stop at middle of intersection
 #       remember starting orientation & maintain current orientation
-#       change user/server command from left/right/reverse to NEWS directions
+#       change user/server command from NEWS to left/right/reverse directions
 #       logic for converting NEWS to left/right/reverse
 #           ignoring invalid commands
 #           case (reverse) if command is opposite of current direction
