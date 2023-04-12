@@ -19,6 +19,8 @@ PELLET_WEIGHT = 0.65
 FREQUENCY = 30
 GHOST_CUTOFF = 10
 MAX_DEPTH = 5
+GHOST_WEIGHT = 0.35
+FRIGHTENED_GHOST_WEIGHT = .3 * GHOST_WEIGHT
 
 
 class HeuristicHighLevelModule(rm.ProtoModule):
@@ -208,18 +210,56 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         distance = abs(next_loc[0]-curr_loc[0])+abs(next_loc[1]-curr_loc[1])
         return distance
     
-    def closest_ghost(self, paths_to_ghosts, target_loc, p_loc):
-        closest_ghost = (None, float('inf'))
-        ghosts = []
-        for state, path in paths_to_ghosts:
-            dist = len(path) - 1
-            closest_ghost = (state, dist) if dist < closest_ghost[1] else closest_ghost
-            ghosts.append((state, dist))
-            if self._is_power_pellet_closer(path):
-                if target_loc == p_loc:
-                    return path[1]
-                else:
-                    return path[0]
+    def closest_ghost_and_dist(self, pac_loc):
+        gosts = [self.state.red_ghost, self.state.pink_ghost, self.state.orange_ghost, self.state.blue_ghost]
+        minDist = float('inf')
+        closestGhost = None
+        for ghost in gosts:
+            ghostDist = self.manhattan_distance(pac_loc, [ghost.x, ghost.y])
+            if ghostDist<=minDist:
+                minDist = ghostDist
+                closestGhost = ghost
+        return minDist, closestGhost
+            
+                
+    # def _find_paths_to_closest_ghosts(self, pac_loc):
+    #     ghosts = [self.state.red_ghost, self.state.pink_ghost, self.state.orange_ghost, self.state.blue_ghost]
+    #     state_paths = [(ghost.state, bfs(self.grid, pac_loc, (ghost.x, ghost.y), GHOST_CUTOFF)) for ghost in ghosts]
+    #     return [sp for sp in state_paths if sp[1] is not None]
+    
+    def minMaxHurestic(self, p_loc):
+        targets = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1), (p_loc[0], p_loc[1] + 1)]
+        directions =  [PacmanCommand.STOP, PacmanCommand.WEST, PacmanCommand.EAST, PacmanCommand.SOUTH, PacmanCommand.NORTH]
+        heuristics = []
+        for target_loc in targets:
+            if self._target_is_invalid(target_loc):
+                heuristics.append(float('inf'))
+                continue
+            dist_to_pellet = self._find_distance_of_closest_pellet(target_loc)
+
+            minDistToGhost, closest_ghost = self.closest_ghost_and_dist(target_loc)
+
+            ghost_heuristic = 0
+            for state, dist in ghosts:
+                if dist < GHOST_CUTOFF:
+                    if state == LightState.NORMAL:
+                        ghost_heuristic += pow((GHOST_CUTOFF - closest_ghost[1]), 2) * GHOST_WEIGHT
+                    else:
+                        ghost_heuristic += pow((GHOST_CUTOFF - closest_ghost[1]), 2) * -1 * FRIGHTENED_GHOST_WEIGHT
+
+            pellet_heuristic = dist_to_pellet * PELLET_WEIGHT
+            heuristics.append(ghost_heuristic + pellet_heuristic)
+        # print(heuristics)
+        mins = []
+        min_heur = float('inf')
+        for i, heur in enumerate(heuristics):
+            if heur < min_heur:
+                min_heur = heur
+                mins = [(directions[i], targets[i])]
+            elif heur == min_heur:
+                mins.append((directions[i], targets[i]))
+        return self._get_target_with_min_turning_direction(mins)
+    
         
     def _find_best_target(self, p_loc):
         targets = [p_loc, (p_loc[0] - 1, p_loc[1]), (p_loc[0] + 1, p_loc[1]), (p_loc[0], p_loc[1] - 1), (p_loc[0], p_loc[1] + 1)]
