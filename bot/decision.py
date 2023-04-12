@@ -1,3 +1,14 @@
+# TODO: add reverse command in running state
+#       use new sensor to stop at middle of intersection
+#       remember starting orientation & maintain current orientation
+#       change user/server command from NEWS to left/right/reverse directions
+#       logic for converting NEWS to left/right/reverse
+#           ignoring invalid commands
+#           case (reverse) if command is opposite of current direction
+#           case (left/right) if command is left/right of current direction (e.g. N->E means right)
+#           case (ignore) if command same as current direction or invalid
+
+
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 

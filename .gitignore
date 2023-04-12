@@ -128,3 +128,5 @@ dmypy.json
 .pyre/
 
 .DS_Store
+src/botCode/.DS_Store
+*.pyc
