@@ -4,13 +4,15 @@ import cv2
 import numpy as np
 import sys
 from time import sleep
-from variables import lower_green, upper_green, lower_yellow, upper_yellow
+from variables import lower_green, upper_green, lower_yellow, upper_yellow, lower_red, upper_red, lower_blue, upper_blue
 
-CAM_NUM = 3
+CAM_NUM = 0
 
-green = True
-if '-y' in sys.argv:
-    green = False
+green = False
+red = True
+blue = False
+# if '-y' in sys.argv:
+#     green = False
 
 def nothing(x):
     pass
@@ -23,12 +25,20 @@ class ViewImages:
     def __init__(self):
 
         # Set thresholds for color detection and thresholding
-        if green:
-            self.thresh_low = lower_green
-            self.thresh_high = upper_green 
-        else:
-            self.thresh_low = lower_yellow
-            self.thresh_high = upper_yellow 
+        # if green:
+        #     self.thresh_low = lower_green
+        #     self.thresh_high = upper_green 
+        # if red:
+        #     self.thresh_low = lower_red
+        #     self.thresh_high = upper_red
+        # if blue:
+        #     self.thresh_low = lower_blue
+        #     self.thresh_high = upper_blue
+        # else:
+        #     self.thresh_low = lower_yellow
+        #     self.thresh_high = upper_yellow 
+        self.thresh_low = lower_blue
+        self.thresh_high = upper_blue
 
     def run(self):
        # Create a black image, a window
