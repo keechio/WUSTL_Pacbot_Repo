@@ -18,7 +18,7 @@ PORT = os.environ.get("LOCAL_PORT", 11295)
 PELLET_WEIGHT = 0.65
 FREQUENCY = 30
 GHOST_CUTOFF = 10
-MAX_DEPTH = 5
+MAX_DEPTH = 7
 
 
 class HeuristicHighLevelModule(rm.ProtoModule):
@@ -53,7 +53,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     max step in minimax
     makes pacman move in each possible direction then calls min step
     returns score if it hits a ghost
-    """
+    
 
     def maxVal(self, gameState, depth):
         if depth > MAX_DEPTH:
@@ -69,12 +69,13 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             new_gameState.pacbot.pos = move
             v = max(v, self.minVal(new_gameState, depth))
         return v
+    """
 
     """
     min step in minimax
     makes each ghost move according to algorithm then calls max step
     returns score if it hits a ghost
-    """
+    
 
     def minVal(self, gameState, depth):
         v = float('inf')
@@ -84,10 +85,11 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             return gameState.score
         v = min(v, self.maxVal(gameState, depth + 1))
         return v
+    """
 
     """
     function calls min step to start the minmax tree
-    """
+    
 
     def minMaxAction(self):
         # state gives a list of actions
@@ -112,6 +114,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 best_action = move
                 returning = maxv
         return best_action
+    """
 
     """
     max step in minimax
@@ -129,13 +132,26 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                  (prev_loc[0], prev_loc[1] + 1)]
         moves = self.pac_get_legal_moves(state, gameState.grid)
         for move in moves:
-            new_gameState = copy.deepcopy(gameState)
+            old_pac_pos = self.pacbot.pos
+            new_gameState = copy.copy(gameState)
             new_gameState.pacbot.pos = move
+            prev_pos = [copy.deepcopy(self.gameState.red.pos), copy.deepcopy(self.gameState.pink.pos),
+                        copy.deepcopy(self.gameState.orange.pos), copy.deepcopy(self.gameState.blue.pos)]
+            prev_respawn_counters = [self.gameState.red.respawn_counter, self.gameState.pink.respawn_counter,
+                                     self.gameState.orange.respawn_counter, self.gameState.blue.respawn_counter]
+            prev_frightened_counters = [self.gameState.red.frightened_counter, self.gameState.pink.respawn_counter,
+                                        self.gameState.orange.respawn_counter, self.gameState.blue.respawn_counter]
             v = max(v, self.minValAB(new_gameState, depth, alpha, beta))
+            self.gameState.red.undo_move(prev_pos[0], prev_respawn_counters[0], prev_frightened_counters[0])
+            self.gameState.pink.undo_move(prev_pos[1], prev_respawn_counters[1], prev_frightened_counters[1])
+            self.gameState.orange.undo_move(prev_pos[2], prev_respawn_counters[2], prev_frightened_counters[2])
+            self.gameState.blue.undo_move(prev_pos[3], prev_respawn_counters[3], prev_frightened_counters[3])
             if v >= beta:
                 return v
             alpha = max(alpha, v)
+            new_gameState.pacbot.pos = old_pac_pos
         return v
+
 
     """
     min step in minimax
@@ -149,7 +165,10 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             return gameState.score
         if gameState._should_die():
             return gameState.score
+        prev_game_state_arr = self.gameState.return_instance_variables()
+        prev_grid = copy.deepcopy(self.gameState.grid)
         v = min(v, self.maxValAB(gameState, depth + 1, alpha, beta))
+        self.gameState.undo_step(prev_game_state_arr, prev_grid)
         if v <= alpha:
             return v
         beta = min(beta, v)
@@ -171,16 +190,39 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                  (prev_loc[0], prev_loc[1] + 1)]
         moves = self.pac_get_legal_moves(state, self.gameState.grid)
         for move in moves:
-            new_gamestate = copy.deepcopy(self.gameState)
+            """
+            print("move")
+            print(self.pacbot.pos)
+            print(move)
+            if(self._get_direction(self.gameState.pacbot.pos, move) == PacmanCommand.SOUTH):
+                print("?")
+
+            direction = self._get_direction(self.gameState.pacbot.pos, move)
+            if (direction == PacmanCommand.NORTH):
+                print("N")
+            elif (direction == PacmanCommand.SOUTH):
+                print("S")
+            elif (direction == PacmanCommand.WEST):
+                print("W")
+            else:
+                print("E")
+            """
+            old_pac_pos = self.pacbot.pos
+            new_gamestate = copy.copy(self.gameState)
             new_gamestate.pacbot.pos = move
             maxv = float('-inf')
             if new_gamestate._should_die():
                 maxv = new_gamestate.score
             else:
+                prev_game_state_arr = self.gameState.return_instance_variables()
+                prev_grid = copy.deepcopy(self.gameState.grid)
                 maxv = self.minValAB(new_gamestate, 0, float('-inf'), float('inf'))
+                self.gameState.undo_step(prev_game_state_arr, prev_grid)
+            print(maxv)
             if maxv > returning:
                 best_action = move
                 returning = maxv
+            self.gameState.pacbot.pos = old_pac_pos
         return best_action
 
     def _target_is_invalid(self, target_loc):

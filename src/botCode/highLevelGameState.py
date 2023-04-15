@@ -23,10 +23,8 @@ class HighLevelGameState:
                                           orange_scatter_pos)
         self.blue = HighLevelGhostAgent(blue_init_pos[0], blue_init_pos[1], blue_init_npos[0],
                                         blue_init_npos[1], blue, blue_init_dir, self, blue_start_path, blue_scatter_pos)
-        self.just_swapped_state = False
         self.restart()
-        self.ticks_since_spawn = 0
-        self.prev_cherry_pellets = 0
+
 
     # Frightens all of the ghosts and saves the old state to be restored when frightened mode ends.
     def _become_frightened(self):
@@ -138,30 +136,6 @@ class HighLevelGameState:
         self.orange.respawn()
         self.blue.respawn()
 
-    def _end_game(self):
-        self.elapsed_time += time.time() - self.previous_start
-        self.play = False
-        print("Score: " + str(self.score))
-        print("Time: " + str(self.elapsed_time))
-
-    # Resets the round if Pacman dies with lives remaining
-    # and ends the game if Pacman has no lives remaining.
-    def _die(self):
-        if self.lives > 1:
-            self._respawn_agents()
-            self.start_counter = 0
-            self.state_counter = 0
-            self.lives -= 1
-            self.old_state = chase
-            self.state = scatter
-            self.frightened_counter = 0
-            self.frightened_multiplier = 1
-            self.pause()
-            self._update_score()
-            self.grid[cherry_pos[0]][cherry_pos[1]] = e
-        else:
-            self._end_game()
-
     # Returns true if Pacman has collided with a ghost and the ghost is not frightened.
     def _should_die(self):
         return ((self.red.pos["current"] == self.pacbot.pos and self.red.frightened_counter == 0) or
@@ -204,13 +178,6 @@ class HighLevelGameState:
         else:
             self.just_swapped_state = False
 
-    def pause(self):
-        self.elapsed_time += time.time() - self.previous_start
-        self.play = False
-
-    def unpause(self):
-        self.previous_start = time.time()
-        self.play = True
 
     def print_ghost_pos(self):
         ghosts = [self.red, self.pink, self.blue, self.orange]
@@ -250,6 +217,26 @@ class HighLevelGameState:
             self.update_ticks += 1
             return 0
 
+    def return_instance_variables(self):
+        return [self.cherry, self.prev_cherry_pellets, self.old_state, self.state, self.just_swapped_state, self.frightened_counter,
+                self.frightened_multiplier, self.score, self.start_counter, self.state_counter, self.update_ticks,
+                self.ticks_since_spawn]
+
+    def undo_step(self, old_values, old_grid):
+        self.cherry = old_values[0]
+        self.prev_cherry_pellets = old_values[1]
+        self.old_state = old_values[2]
+        self.state = old_values[3]
+        self.just_swapped_state = old_values[4]
+        self.frightened_counter = old_values[5]
+        self.frightened_multiplier = old_values[6]
+        self.score = old_values[7]
+        self.start_counter = old_values[8]
+        self.state_counter = old_values[9]
+        self.update_ticks = old_values[10]
+        self.ticks_since_spawn = old_values[11]
+        self.grid = old_grid
+
     # Sets the game back to its original state (no rounds played).
     def restart(self):
         self.pellets = sum([col.count(o) for col in self.grid])
@@ -263,12 +250,9 @@ class HighLevelGameState:
         self.frightened_multiplier = 1
         self._respawn_agents()
         self.score = 0
-        self.play = False
         self.start_counter = 0
         self.state_counter = 0
         self.update_ticks = 0
-        self.lives = starting_lives
-        self.elapsed_time = 0
         self._update_score()
         self.grid[cherry_pos[0]][cherry_pos[1]] = e
         self.ticks_since_spawn = 0

@@ -214,6 +214,12 @@ class HighLevelGhostAgent:
     def is_frightened(self):
         return self.frightened_counter > 0
 
+    #undo the previous ghost move by putting ghost in previous position which is given as a paremter
+    def undo_move(self, prev_pos, prev_respawn_counter, prev_frightened_counter):
+        self.pos = prev_pos
+        self.respawn_counter = prev_respawn_counter
+        self.frightened_counter = prev_frightened_counter
+
     # Updates the ghost's position and behavior to reflect the beginning of a new round.
     # Distinct from send_home(), which only occurs when the ghost is eaten by Pacman.
     def respawn(self):
