@@ -57,7 +57,7 @@ class MovementProcessor(rm.ProtoModule):
                 delta_y = 1*(y_c/imgray.shape[0] - 0.5)
                 delta_y = 0
                 y_c += delta_y*sector_h
-                cv2.circle(warped, (int(x_c), int(y_c)), 4, color=(0, 0, 255), thickness=-1)
+                cv2.circle(warped, (int(x_c), int(y_c)), 4, color=(255, 0, 0), thickness=-1)
 
         
         if self.show_windows:
