@@ -20,8 +20,9 @@ def main():
         print('select either -t for top cam of -b for bottom cam')
         sys.exit(1)
     if top:
-        camera_number = 1
-        processor = MovementProcessor(ADDRESS, PORT, camera_number, 15, 16, 27, windows, flip_v, flip_h)
+        print('runtop')
+        camera_number = 0
+        processor = MovementProcessor(ADDRESS, PORT, camera_number, 15, 16, 27, True, flip_v, flip_h)
     elif bottom:
         camera_number = 3
         processor = MovementProcessor(ADDRESS, PORT, camera_number, 1, 15, 27, windows, flip_v, flip_h)

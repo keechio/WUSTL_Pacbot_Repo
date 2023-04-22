@@ -1,7 +1,7 @@
 import cv2
 from .transform import *
 import numpy as np
-from .variables import lower_green, upper_green
+from .variables import lower_green, upper_green, lower_yellow, upper_yellow, lower_red, upper_red, lower_blue, upper_blue
 
 def valid(contours):
     x,y = [],[]
@@ -66,7 +66,7 @@ def warp_image(frame):
     # Prepare the image for finding dots
     frame = cv2.medianBlur(frame, 5)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, lower_green, upper_green)
+    mask = cv2.inRange(hsv, lower_blue, upper_blue)
     res = cv2.bitwise_and(frame,frame, mask= mask)
     res = cv2.cvtColor(res,cv2.COLOR_HSV2BGR)
     imgray = cv2.cvtColor(res,cv2.COLOR_BGR2GRAY)
