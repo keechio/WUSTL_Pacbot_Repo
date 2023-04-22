@@ -20,6 +20,9 @@ tca = adafruit_tca9548a.TCA9548A(i2c)
 dis0 = adafruit_vl53l0x.VL53L0X(tca[0])
 dis1 = adafruit_vl53l0x.VL53L0X(tca[1])
 dis2 = adafruit_vl53l0x.VL53L0X(tca[2])
+dis3 = adafruit_vl53l0x.VL53L0X(tca[3])
+dis4 = adafruit_vl53l0x.VL53L0X(tca[4])
+dis5 = adafruit_vl53l0x.VL53L0X(tca[5])
 
 # After initial setup, can just use sensors as normal.
 while True:
@@ -29,7 +32,12 @@ while True:
 
     range0 = dis0.range
     range1 = dis1.range
+
     range2 = dis2.range
+    range3 = dis3.range
+
+    range4 = dis4.range
+    range5 = dis5.range
 
     # Scale the range readings to fit within a 40-character width
     width = 40
@@ -37,15 +45,29 @@ while True:
     scaled1 = int(range1 / 1000 * width)
     scaled2 = int(range2 / 1000 * width)
 
+    scaled3 = int(range3 / 1000 * width)
+    scaled4 = int(range4 / 1000 * width)
+    scaled5 = int(range5 / 1000 * width)
+
+    
+
     # Create a bar graph using ASCII art to represent the range readings
     bar0 = "=" * scaled0 + " " * (width - scaled0)
     bar1 = "=" * scaled1 + " " * (width - scaled1)
+    
     bar2 = "=" * scaled2 + " " * (width - scaled2)
+    bar3 = "=" * scaled3 + " " * (width - scaled3)
+    bar4 = "=" * scaled4 + " " * (width - scaled4)
+    bar5 = "=" * scaled5 + " " * (width - scaled5)
 
     # Print the bar graph for each sensor
     print(f"Sensor 0 [{bar0}] {range0} mm")
     print(f"Sensor 1 [{bar1}] {range1} mm")
     print(f"Sensor 2 [{bar2}] {range2} mm")
+
+    print(f"Sensor 3 [{bar3}] {range3} mm")
+    print(f"Sensor 4 [{bar4}] {range4} mm")
+    print(f"Sensor 5 [{bar5}] {range5} mm")
 
 
 

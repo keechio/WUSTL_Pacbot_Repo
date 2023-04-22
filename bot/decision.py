@@ -36,6 +36,10 @@ dis0 = adafruit_vl53l0x.VL53L0X(tca[0])
 dis1 = adafruit_vl53l0x.VL53L0X(tca[1])
 dis2 = adafruit_vl53l0x.VL53L0X(tca[2])
 
+dis3 = adafruit_vl53l0x.VL53L0X(tca[3])
+dis4 = adafruit_vl53l0x.VL53L0X(tca[4])
+dis5 = adafruit_vl53l0x.VL53L0X(tca[5])
+
 gyro = Gyro()
 motor = motorControl()
 
@@ -48,31 +52,21 @@ while True:
 
     gyro_angle = gyro.get_z_cumulative()
 
-    range0 = dis0.range # left sensor
-    range1 = dis1.range # front sensor
-    range2 = dis2.range # right sensor
+    range0 = dis0.range # left sensors
+    range1 = dis1.range # 
 
-    # Scale the range readings to fit within a 40-character width
-    width = 40
-    scaled0 = int(range0 / 1000 * width)
-    scaled1 = int(range1 / 1000 * width)
-    scaled2 = int(range2 / 1000 * width)
+    range2 = dis2.range # front sensors
+    range3 = dis3.range # 
 
-    # Create a bar graph using ASCII art to represent the range readings
-    bar0 = "=" * scaled0 + " " * (width - scaled0)
-    bar1 = "=" * scaled1 + " " * (width - scaled1)
-    bar2 = "=" * scaled2 + " " * (width - scaled2)
+    range4 = dis4.range # 
+    range5 = dis5.range # right sensors
 
-    # # Print the bar graph for each sensor
-    # print(f"Sensor 0 [{bar0}] {range0} mm")
-    # print(f"Sensor 1 [{bar1}] {range1} mm")
-    # print(f"Sensor 2 [{bar2}] {range2} mm")
 
-        # go st
-        # raight when gyro_z_cumulative is 0
+
+
     delta = 0.03
     rangeDiff = range0 - range2
-    print(gyro_angle)
+    # print(gyro_angle)
     if gyro_angle < -2:
     # if rangeDiff > 20:
         motor.drive(0.2, 0.2 - delta)
@@ -81,17 +75,31 @@ while True:
         motor.drive(0.2 - delta, 0.2)
     else:
         motor.drive(0.2, 0.2)
+    
 
-    if range2 < 60:
+
+    if range4 < 63 :
         motor.stop()
-        
         motor.drive(0, 0.2, direction=False)
         time.sleep(0.15)
         motor.drive(0.2, 0.2)
         time.sleep(0.15)
         gyro.reset()
         gyro_angle = 0
-    elif range0 < 60:
+        print("right front too close")
+
+    elif range1 < 63:
+        motor.stop()
+        motor.drive(0.2, 0, direction=False)
+        time.sleep(0.15)
+        motor.drive(0.2, 0.2)
+        time.sleep(0.15)
+        gyro.reset()
+        gyro_angle = 0
+        print("left front too close")
+
+
+    elif range0-range1>18:
         motor.stop()
         motor.drive(0.2, 0, direction=False)
         time.sleep(0.15)
@@ -100,20 +108,34 @@ while True:
         gyro.reset()
         gyro_angle = 0
 
+        print("too left")
+
+    elif range4-range5>18:
+        motor.stop()
+        motor.drive(0, 0.2, direction=False)
+        time.sleep(0.15)
+        motor.drive(0.2, 0.2)
+        time.sleep(0.15)
+        gyro.reset()
+        gyro_angle = 0
+        print("too right")
+
+    frontAvg = (range2 + range3) / 2
+
     # if wall is detected, stop and wait for user/server command
-    if range1 < 120:
+    if frontAvg < 120:
         motor.stop()
         print("WALL! STOP")
         # motor.drive(0.2, 0.2, False)
         # print("BACKING UP")
         time.sleep(1)
-        if range0 < range2:
+        if range1 < range4:
             print("OK TO GO RIGHT")
             # motor.spin_right(0.1, 90)
-        elif range0 > range2:
+        elif range1 > range4:
             print("OK TO GO LEFT")
             # motor.spin_left(0.1, 90)
-        elif range0 > 200 and range2 > 200:
+        elif range1 > 200 and range4 > 200:
             print("T TURN")
 
         # wait for user/server command
@@ -134,21 +156,21 @@ while True:
         gyro_angle = 0
     
     # if at intersection, stop and wait for user/server command
-    if (range0 > 200 or range2 > 200) and range1 > 400:
-        motor.drive(0.2, 0.2)
-        time.sleep(0.65)
+    if (range1 > 200 and range0 > 200 or range4 > 200 and range5 > 200) and frontAvg > 400:
+        # motor.drive(0.2, 0.2)
+        # time.sleep(0.65)
         motor.stop()
         print("INTERSECTION! STOP")
         # motor.drive(0.2, 0.2, False)
         # print("BACKING UP")
-        time.sleep(1)
-        if range0 < range2:
+        # time.sleep(1)
+        if range1 < range4:
             print("OK TO GO RIGHT")
             # motor.spin_right(0.1, 90)
-        elif range0 > range2:
+        elif range1 > range4:
             print("OK TO GO LEFT")
             # motor.spin_left(0.1, 90)
-        elif range0 > 200 and range2 > 200:
+        elif range1 > 200 and range4 > 200:
             print("X CROSSING")
 
         # wait for user/server command
@@ -176,4 +198,4 @@ while True:
 
 
     # Wait for a short period of time before printing the next set of readings
-    time.sleep(0.02)
+    time.sleep(0.05)

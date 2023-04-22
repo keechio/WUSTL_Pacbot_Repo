@@ -21,9 +21,9 @@ i2c = board.I2C()  # uses board.SCL and board.SDA
 tca = adafruit_tca9548a.TCA9548A(i2c)
 
 # For each sensor, create it using the TCA9548A channel instead of the I2C object
-dis0 = adafruit_vl53l0x.VL53L0X(tca[0])
-dis1 = adafruit_vl53l0x.VL53L0X(tca[1])
-dis2 = adafruit_vl53l0x.VL53L0X(tca[2])
+dis0 = adafruit_vl53l0x.VL53L0X(tca[1])
+dis1 = adafruit_vl53l0x.VL53L0X(tca[2])
+dis2 = adafruit_vl53l0x.VL53L0X(tca[4])
 
 gyro = Gyro()
 motor = motorControl()
