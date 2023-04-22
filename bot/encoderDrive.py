@@ -28,7 +28,7 @@ anglecurr = 0
 tprev = 0
 tcurr = 0
 tstart = time.perf_counter()
-angle_target = -inchToDeg(6)
+angle_target = -inchToDeg(3)
 max_power = 0.8
 min_power = 0.2
 
