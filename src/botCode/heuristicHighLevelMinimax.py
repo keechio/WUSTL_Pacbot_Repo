@@ -149,10 +149,23 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             #old_pac_pos = self.pacbot.pos
             new_gamestate = copy.deepcopy(self.gameState)
             new_gamestate.pacbot.pos = move
-            print('starting pos')
+            print('starting pos red')
             print(new_gamestate.red.pos['current'])
-            print('next pos')
+            print('next pos red')
             print(new_gamestate.red.pos['next'])
+            print('starting pos or')
+            print(new_gamestate.orange.pos['current'])
+            print('next pos or')
+            print(new_gamestate.orange.pos['next'])
+            print('starting pos blue')
+            print(new_gamestate.blue.pos['current'])
+            print('next pos blue')
+            print(new_gamestate.blue.pos['next'])
+            print('starting pos pink')
+            print(new_gamestate.pink.pos['current'])
+            print('next pos pink')
+            print(new_gamestate.pink.pos['next'])
+            print((self.state.pink_ghost.x, self.state.pink_ghost.y))
             maxv = float('-inf')
             if new_gamestate._should_die():
                 print("dying")
@@ -195,10 +208,10 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         if self.pacbot.pos != (self.state.pacman.x, self.state.pacman.y):
             self.gameState.next_step()
         self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
-        self.gameState.red.pos['current'] = (self.state.red_ghost.x, self.state.red_ghost.y)
-        self.gameState.pink.pos['current'] = (self.state.pink_ghost.x, self.state.pink_ghost.y)
-        self.gameState.orange.pos['current'] = (self.state.orange_ghost.x, self.state.orange_ghost.y)
-        self.gameState.blue.pos['current'] = (self.state.blue_ghost.x, self.state.blue_ghost.y)
+        #self.gameState.red.pos['current'] = (self.state.red_ghost.x, self.state.red_ghost.y)
+        #self.gameState.pink.pos['current'] = (self.state.pink_ghost.x, self.state.pink_ghost.y)
+        #self.gameState.orange.pos['current'] = (self.state.orange_ghost.x, self.state.orange_ghost.y)
+        #self.gameState.blue.pos['current'] = (self.state.blue_ghost.x, self.state.blue_ghost.y)
 
         #figure out how to update other ghost values and gamestate values
 

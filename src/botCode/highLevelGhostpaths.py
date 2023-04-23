@@ -5,15 +5,15 @@ from highLevelVariables import *
 # some time before eventually leaving. Red begins outside the zone, and as such
 # does not have a predefined starting path.
 
-pink_start_path = [((14,17),up),((14,18),up),((14,19),up)]
+pink_start_path = [((14,18),up),((14,19),up)]
 
-blue_start_path = [((12,17),up),((12,16),down),((12,15),down),((12,16),up),((12,17),up),
+blue_start_path = [((12,16),down),((12,15),down),((12,16),up),((12,17),up),
             ((12,16),down),((12,15),down),((12,16),up),((12,17),up),((12,16),down),
             ((12,15),down),((12,16),up),((12,17),up),((12,16),down),((12,15),down),
             ((12,16),up),((12,17),up),((12,16),down),((12,15),down),((13,15),right),
             ((13,16),up),((13,17),up),((13,18),up),((13,19),up)]
 
-orange_start_path = [((15,17),up),((15,16),down),((15,15),down),((15,16),up),((15,17),up),
+orange_start_path = [((15,16),down),((15,15),down),((15,16),up),((15,17),up),
               ((15,16),down),((15,15),down),((15,16),up),((15,17),up),((15,16),down),
               ((15,15),down),((15,16),up),((15,17),up),((15,16),down),((15,15),down),
               ((15,16),up),((15,17),up),((15,16),down),((15,15),down),((15,16),up),

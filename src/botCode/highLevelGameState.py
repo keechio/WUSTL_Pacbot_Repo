@@ -14,15 +14,15 @@ class HighLevelGameState:
     def __init__(self, pacbot, gs_grid):
         self.grid = gs_grid
         self.pacbot = pacbot
-        self.red = HighLevelGhostAgent(red_init_pos[0], red_init_pos[1], red_init_npos[0],
-                                       red_init_npos[1], red, red_init_dir, self, [], red_scatter_pos)
-        self.pink = HighLevelGhostAgent(pink_init_pos[0], pink_init_pos[1], pink_init_npos[0],
-                                        pink_init_npos[1], pink, pink_init_dir, self, pink_start_path, pink_scatter_pos)
-        self.orange = HighLevelGhostAgent(orange_init_pos[0], orange_init_pos[1], orange_init_npos[0],
-                                          orange_init_npos[1], orange, red_init_dir, self, orange_start_path,
+        self.red = HighLevelGhostAgent(12, 19, 11,
+                                       19, red, red_init_dir, self, [], red_scatter_pos)
+        self.pink = HighLevelGhostAgent(14, 16, 14,
+                                        17, pink, pink_init_dir, self, pink_start_path, pink_scatter_pos)
+        self.orange = HighLevelGhostAgent(15, 16, 15,
+                                          17, orange, red_init_dir, self, orange_start_path,
                                           orange_scatter_pos)
-        self.blue = HighLevelGhostAgent(blue_init_pos[0], blue_init_pos[1], blue_init_npos[0],
-                                        blue_init_npos[1], blue, blue_init_dir, self, blue_start_path, blue_scatter_pos)
+        self.blue = HighLevelGhostAgent(12, 16, 12,
+                                        17, blue, blue_init_dir, self, blue_start_path, blue_scatter_pos)
         self.restart()
 
 
