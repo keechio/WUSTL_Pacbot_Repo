@@ -19,7 +19,7 @@ PORT = os.environ.get("LOCAL_PORT", 11295)
 PELLET_WEIGHT = 0.65
 FREQUENCY = 30
 GHOST_CUTOFF = 10
-MAX_DEPTH = 1
+MAX_DEPTH = 4
 
 
 class HeuristicHighLevelModule(rm.ProtoModule):
@@ -50,86 +50,14 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 return_moves.append(move)
         return return_moves
 
-    """
-    max step in minimax
-    makes pacman move in each possible direction then calls min step
-    returns score if it hits a ghost
-    
-
-    def maxVal(self, gameState, depth):
-        if depth > MAX_DEPTH:
-            return gameState.score
-        v = float('-inf')
-        prev_loc = gameState.pacbot.pos
-        state = [(prev_loc[0] - 1, prev_loc[1]), (prev_loc[0] + 1, prev_loc[1]),
-                 (prev_loc[0], prev_loc[1] - 1),
-                 (prev_loc[0], prev_loc[1] + 1)]
-        moves = self.pac_get_legal_moves(state, gameState.grid)
-        for move in moves:
-            new_gameState = copy.deepcopy(gameState)
-            new_gameState.pacbot.pos = move
-            v = max(v, self.minVal(new_gameState, depth))
-        return v
-    """
-
-    """
-    min step in minimax
-    makes each ghost move according to algorithm then calls max step
-    returns score if it hits a ghost
-    
-
-    def minVal(self, gameState, depth):
-        v = float('inf')
-        if gameState.next_step():
-            return gameState.score
-        if gameState._should_die():
-            return gameState.score
-        v = min(v, self.maxVal(gameState, depth + 1))
-        return v
-    """
-
-    """
-    function calls min step to start the minmax tree
-    
-
-    def minMaxAction(self):
-        # state gives a list of actions
-        # if (game ended):
-        # return
-        returning = float('-inf')
-        best_action = None
-        prev_loc = self.gameState.pacbot.pos
-        state = [(prev_loc[0] - 1, prev_loc[1]), (prev_loc[0] + 1, prev_loc[1]),
-                 (prev_loc[0], prev_loc[1] - 1),
-                 (prev_loc[0], prev_loc[1] + 1)]
-        moves = self.pac_get_legal_moves(state, self.gameState.grid)
-        for move in moves:
-            new_gamestate = copy.deepcopy(self.gameState)
-            new_gamestate.pacbot.pos = move
-            maxv = float('-inf')
-            if new_gamestate._should_die():
-                maxv = new_gamestate.score
-            else:
-                maxv = self.minVal(new_gamestate, 0)
-            if maxv > returning:
-                best_action = move
-                returning = maxv
-        return best_action
-    """
-
-    """
-    max step in minimax
-    makes pacman move in each possible direction then calls min step
-    returns score if it hits a ghost
-    """
-
     def maxValAB(self, gameState, depth, alpha, beta):
         if depth > MAX_DEPTH:
             return gameState.score + self.get_eval_val(gameState)
         v = float('-inf')
         prev_loc = gameState.pacbot.pos
-        state = [(prev_loc[0] - 1, prev_loc[1]), (prev_loc[0] + 1, prev_loc[1]),
+        state = [(prev_loc[0] - 1, prev_loc[1]),
                  (prev_loc[0], prev_loc[1] - 1),
+                 (prev_loc[0] + 1, prev_loc[1]),
                  (prev_loc[0], prev_loc[1] + 1)]
         moves = self.pac_get_legal_moves(state, gameState.grid)
         for move in moves:
@@ -161,13 +89,17 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     """
     def minValAB(self, gameState, depth, alpha, beta):
         v = float('inf')
+        #print("pre")
+        #print(gameState.red.pos['current'])
         if gameState.next_step():
             return gameState.score + self.get_eval_val(gameState)
+        #print("post")
+        #print(gameState.red.pos['current'])
         if gameState._should_die():
             return gameState.score + self.get_eval_val(gameState) - 1000
         #prev_game_state_arr = self.gameState.return_instance_variables()
-        prev_grid = copy.deepcopy(self.gameState.grid)
-        v = min(v, self.maxValAB(gameState, depth + 1, alpha, beta))
+        #prev_grid = copy.deepcopy(self.gameState.grid)
+        v = self.maxValAB(gameState, depth + 1, alpha, beta)
         #self.gameState.undo_step(prev_game_state_arr, prev_grid)
         if v <= alpha:
             return v
@@ -185,8 +117,9 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         returning = float('-inf')
         best_action = None
         prev_loc = self.gameState.pacbot.pos
-        state = [(prev_loc[0] - 1, prev_loc[1]), (prev_loc[0] + 1, prev_loc[1]),
+        state = [(prev_loc[0] - 1, prev_loc[1]),
                  (prev_loc[0], prev_loc[1] - 1),
+                 (prev_loc[0] + 1, prev_loc[1]),
                  (prev_loc[0], prev_loc[1] + 1)]
         moves = self.pac_get_legal_moves(state, self.gameState.grid)
         #print(prev_loc)
@@ -195,29 +128,31 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         #print(self.gameState.orange.pos['current'])
         #print(self.gameState.pink.pos['current'])
         for move in moves:
-            """
-            print("move")
-            print(self.pacbot.pos)
-            print(move)
+
+            #print("pacbot pos")
+            #print(self.pacbot.pos)
+            #print("pacbot target")
+            #print(move)
 
             direction = self._get_direction(self.gameState.pacbot.pos, move)
-            if (direction == PacmanCommand.NORTH):
-                print("N")
-            elif (direction == PacmanCommand.SOUTH):
-                print("S")
-            elif (direction == PacmanCommand.WEST):
-                print("W")
-            else:
-                print("E")
-            """
+            #print("move direction")
+            #if (direction == PacmanCommand.NORTH):
+            #    print("N")
+            #elif (direction == PacmanCommand.SOUTH):
+            #    print("S")
+            #elif (direction == PacmanCommand.WEST):
+            #    print("W")
+            #else:
+            #    print("E")
+
 
             #old_pac_pos = self.pacbot.pos
             new_gamestate = copy.deepcopy(self.gameState)
-            print("curr blue")
-            print(self.gameState.blue.pos['current'])
-            print("new blue")
-            print(new_gamestate.blue.pos['current'])
             new_gamestate.pacbot.pos = move
+            print('starting pos')
+            print(new_gamestate.red.pos['current'])
+            print('next pos')
+            print(new_gamestate.red.pos['next'])
             maxv = float('-inf')
             if new_gamestate._should_die():
                 print("dying")
@@ -227,6 +162,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 #prev_grid = copy.deepcopy(self.gameState.grid)
                 maxv = self.minValAB(new_gamestate, 0, float('-inf'), float('inf'))
                 #self.gameState.undo_step(prev_game_state_arr, prev_grid)
+            print("score")
+            print(maxv)
             if maxv > returning:
                 best_action = move
                 returning = maxv
@@ -255,8 +192,9 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         return min(turns, key=itemgetter(0))[1]
     
     def _update_game_state(self):
+        if self.pacbot.pos != (self.state.pacman.x, self.state.pacman.y):
+            self.gameState.next_step()
         self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
-
         self.gameState.red.pos['current'] = (self.state.red_ghost.x, self.state.red_ghost.y)
         self.gameState.pink.pos['current'] = (self.state.pink_ghost.x, self.state.pink_ghost.y)
         self.gameState.orange.pos['current'] = (self.state.orange_ghost.x, self.state.orange_ghost.y)
@@ -312,41 +250,51 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     def get_eval_val(self, gameState):
         eval_val = 0
         min_dist, avg_dist = self.closest_ghost_and_dist(gameState)
-        eval_val += min_dist * 1.5
-        if min_dist < 5:
+        #eval_val += min_dist * 1.5
+        #print("min dist")
+        #print(min_dist)
+        if min_dist < 2:
             eval_val -= 100
         #if(gameState.state != frightened):
             #eval_val -= avg_dist
         #eval_val += gameState.power_pellets*4
         #eval_val -= gameState.pellets * 2
-
-
+        #print("score before dist")
+        #print(eval_val)
+        dist_to_pellet = self._find_distance_of_closest_pellet(gameState)
+        #print(dist_to_pellet)
+        #print(dist_to_pellet)
+        eval_val -= dist_to_pellet * 2
         return eval_val
+
+    def _find_distance_of_closest_pellet(self, gameState):
+        return len(bfs(gameState.grid, gameState.pacbot.pos, [o])) - 1
+    def _find_paths_to_closest_ghosts(self, gameState):
+        #ghosts = [gameState.red, gameState.pink, gameState.orange, gameState.blue]
+        #state_paths = [(ghost.state, bfs(gameState.grid, gameState.pacbot.pos, (ghost['current'].x, ghost['current'].y), GHOST_CUTOFF)) for ghost in ghosts]
+        return [sp for sp in state_paths if sp[1] is not None]
     def closest_ghost_and_dist(self, gamestate):
         ghosts = [gamestate.red, gamestate.pink, gamestate.orange, gamestate.blue]
         minDist = float('inf')
         avgDist = 0
         closestGhost = None
         for ghost in ghosts:
+            #if(ghost.color == 4):
+                #print("ghosts manhatten")
+                #print(self.gameState.blue.pos['current'])
+                #print(gamestate.blue.pos['current'])
             ghostDist = self.manhattan_distance(gamestate.pacbot.pos, [ghost.pos['current'][0], ghost.pos['current'][1]])
-            if ghost.color == 4:
-                print("pacman pos")
-                print(gamestate.pacbot.pos)
-                print("closest ghost blue")
-                print(self.gameState.blue.pos['current'])
-                print("ghost dist")
-                print(ghostDist)
+            #print("min dist calc")
+            #print(gamestate.pacbot.pos)
+            #print([ghost.pos['current'][0], ghost.pos['current'][1]])
+            #print(self.manhattan_distance(gamestate.pacbot.pos, [ghost.pos['current'][0], ghost.pos['current'][1]]))
             avgDist += ghostDist
             if ghostDist <= minDist:
                 closestGhost = ghost
                 minDist = ghostDist
-        print("mindist")
-        print(minDist)
         return minDist, avgDist//4
 
     def manhattan_distance(self, curr_loc, next_loc):
-        #print(curr_loc)
-        #print(next_loc)
         distance = abs(next_loc[0] - curr_loc[0]) + abs(next_loc[1] - curr_loc[1])
         #print(distance)
         return distance
