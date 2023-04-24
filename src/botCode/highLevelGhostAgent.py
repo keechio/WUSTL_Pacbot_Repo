@@ -210,8 +210,18 @@ class HighLevelGhostAgent:
             #print(self.pos['next'])
             #print(self.pos['next'] not in self._find_possible_moves_cur())
             #print(self._find_possible_moves_cur())
-        if self.pos['next'] not in self._find_possible_moves_cur():
-            self.pos['next'] = self._find_possible_moves_cur()[0]
+        available_moves = self._find_possible_moves_cur()
+        if self.pos['next'] not in available_moves:
+            if(self.direction == up and (self.pos['current'][0], self.pos['current'][1]+1) in available_moves):
+                self.pos['next'] = (self.pos['current'][0], self.pos['current'][1]+1)
+            elif (self.direction == down and (self.pos['current'][0], self.pos['current'][1]-1) in available_moves):
+                self.pos['next'] = (self.pos['current'][0], self.pos['current'][1]-1)
+            elif (self.direction == left and (self.pos['current'][0]-1, self.pos['current'][1]) in available_moves):
+                self.pos['next'] = (self.pos['current'][0]-1, self.pos['current'][1])
+            elif (self.direction == right and (self.pos['current'][0]+1, self.pos['current'][1]+1) in available_moves):
+                self.pos['next'] = (self.pos['current'][0]+1, self.pos['current'][1])
+            else:
+                self.pos['next'] = self._find_possible_moves_cur()[0]
         #if (self.color == 1):
             #print("post change update")
             #print(self.pos['current'])
