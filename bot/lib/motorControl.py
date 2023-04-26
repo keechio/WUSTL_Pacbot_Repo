@@ -15,14 +15,14 @@ class Motor:
 
 
     def forward(self, pwm):
-        self.in1.on()
-        self.in2.off()
+        self.in1.off()
+        self.in2.on()
         self.pwm.value = pwm
 
 
     def backward(self, pwm):
-        self.in1.off()
-        self.in2.on()
+        self.in1.on()
+        self.in2.off()
         self.pwm.value = pwm
 
     def stop(self):
@@ -48,7 +48,15 @@ class motorControl():
         else:
             self.motor_left.backward(pwm_left)
             self.motor_right.backward(pwm_right)
-
+    def tank(self, left_speed, right_speed):
+        if left_speed < 0:
+            self.motor_left.backward(left_speed)
+        else:
+            self.motor_left.forward(left_speed)
+        if right_speed < 0:
+            self.motor_right.backward(right_speed)
+        else:
+            self.motor_right.forward(right_speed)
     def drive(self, left_speed, right_speed, direction = True):
         if direction:
             self.motor_left.forward(left_speed)
@@ -65,33 +73,35 @@ class motorControl():
             return
 
     def spin_right(self, speed, targetAngle = None):
+        targetAngle = targetAngle-5
         if not targetAngle:
-            self.motor_left.backward(speed)
-            self.motor_right.forward(speed)
+            self.motor_right.backward(speed)
+            self.motor_left.forward(speed)
         else:
             targetAngle = -targetAngle
             self.gyro.reset()
             while True:
                 angle = self.gyro.get_z_cumulative()
                 print(angle)
-                self.motor_left.backward(speed)
-                self.motor_right.forward(speed)
+                self.motor_left.forward(speed)
+                self.motor_right.backward(speed)
                 if angle < targetAngle:
                     break
                 sleep(0.1)
             self.stop()
 
     def spin_left(self, speed, targetAngle = None):
+        targetAngle = targetAngle-5
         if not targetAngle:
-            self.motor_left.forward(speed)
-            self.motor_right.backward(speed)
+            self.motor_left.backward(speed)
+            self.motor_right.forward(speed)
         else:
             self.gyro.reset()
             while True:
                 angle = self.gyro.get_z_cumulative()
                 print(angle)
-                self.motor_left.forward(speed)
-                self.motor_right.backward(speed)
+                self.motor_left.backward(speed)
+                self.motor_right.forward(speed)
                 if angle > targetAngle:
                     break
                 sleep(0.1)
@@ -101,6 +111,17 @@ class motorControl():
     def stop(self):
         self.motor_left.stop()
         self.motor_right.stop()
+    
+    def restDir(self):
+        while self.gyro.get_z_cumulative() < -2.5:
+            print('reset')
+            self.spin_right(0.23,1)
+        while self.gyro.get_z_cumulative() > 2.5:
+            self.spin_left(0.23,1)
+            print('reset')
+        self.stop()
+
+
 
 
 if __name__ == "__main__":
