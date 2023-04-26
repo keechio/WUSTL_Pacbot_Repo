@@ -19,7 +19,7 @@ PORT = os.environ.get("LOCAL_PORT", 11295)
 PELLET_WEIGHT = 0.65
 FREQUENCY = 30
 GHOST_CUTOFF = 10
-MAX_DEPTH = 4
+MAX_DEPTH = 5
 
 
 class HeuristicHighLevelModule(rm.ProtoModule):
@@ -50,7 +50,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 return_moves.append(move)
         return return_moves
 
-    def maxValAB(self, gameState, depth, alpha, beta):
+    def maxValAB(self, gameState, depth, alpha, beta, eval_score):
         if depth > MAX_DEPTH:
             return gameState.score + self.get_eval_val(gameState)
         v = float('-inf')
@@ -70,7 +70,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                                      #self.gameState.orange.respawn_counter, self.gameState.blue.respawn_counter]
             #prev_frightened_counters = [self.gameState.red.frightened_counter, self.gameState.pink.respawn_counter,
                                         #self.gameState.orange.respawn_counter, self.gameState.blue.respawn_counter]
-            v = max(v, self.minValAB(new_gameState, depth, alpha, beta))
+            v = max(v, self.minValAB(new_gameState, depth, alpha, beta, eval_score))
             #self.gameState.red.undo_move(prev_pos[0], prev_respawn_counters[0], prev_frightened_counters[0])
             #self.gameState.pink.undo_move(prev_pos[1], prev_respawn_counters[1], prev_frightened_counters[1])
             #self.gameState.orange.undo_move(prev_pos[2], prev_respawn_counters[2], prev_frightened_counters[2])
@@ -87,7 +87,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     makes each ghost move according to algorithm then calls max step
     returns score if it hits a ghost
     """
-    def minValAB(self, gameState, depth, alpha, beta):
+    def minValAB(self, gameState, depth, alpha, beta, eval_score):
         v = float('inf')
         #print("pre")
         #print(gameState.red.pos['current'])
@@ -99,7 +99,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             return gameState.score + self.get_eval_val(gameState) - 1000
         #prev_game_state_arr = self.gameState.return_instance_variables()
         #prev_grid = copy.deepcopy(self.gameState.grid)
-        v = self.maxValAB(gameState, depth + 1, alpha, beta)
+        v = self.maxValAB(gameState, depth + 1, alpha, beta, eval_score)
         #self.gameState.undo_step(prev_game_state_arr, prev_grid)
         if v <= alpha:
             return v
@@ -129,38 +129,41 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         #print(self.gameState.pink.pos['current'])
         for move in moves:
 
-            #print("pacbot pos")
-            #print(self.pacbot.pos)
-            #print("pacbot target")
-            #print(move)
+            print("pacbot pos")
+            print(self.pacbot.pos)
+            print("pacbot target")
+            print(move)
 
             direction = self._get_direction(self.gameState.pacbot.pos, move)
-            #print("move direction")
-            #if (direction == PacmanCommand.NORTH):
-            #    print("N")
-            #elif (direction == PacmanCommand.SOUTH):
-            #    print("S")
-            #elif (direction == PacmanCommand.WEST):
-            #    print("W")
-            #else:
-            #    print("E")
+            print("move direction")
+            if (direction == PacmanCommand.NORTH):
+                print("N")
+            elif (direction == PacmanCommand.SOUTH):
+                print("S")
+            elif (direction == PacmanCommand.WEST):
+                print("W")
+            else:
+                print("E")
 
 
             #old_pac_pos = self.pacbot.pos
             new_gamestate = copy.deepcopy(self.gameState)
             new_gamestate.pacbot.pos = move
-            print('starting pos')
-            print(new_gamestate.red.pos['current'])
-            print('next pos')
-            print(new_gamestate.red.pos['next'])
+            #print('ghost state pos')
+            #print((self.state.pink_ghost.x,self.state.pink_ghost.y))
+            #print('current pos')
+            #print(new_gamestate.pink.pos['current'])
+            #print('next pos')
+            #print(new_gamestate.pink.pos['next'])
             maxv = float('-inf')
             if new_gamestate._should_die():
-                print("dying")
-                maxv = new_gamestate.score + self.get_eval_val(new_gamestate) - 1000
+                print("next step dying")
+                maxv = new_gamestate.score + self.get_eval_val(new_gamestate) - 10000
             else:
                 #prev_game_state_arr = self.gameState.return_instance_variables()
                 #prev_grid = copy.deepcopy(self.gameState.grid)
-                maxv = self.minValAB(new_gamestate, 0, float('-inf'), float('inf'))
+                maxv = self.minValAB(new_gamestate, 1, float('-inf'), float('inf')
+                                     , self.evaluate_move(new_gamestate, 0))
                 #self.gameState.undo_step(prev_game_state_arr, prev_grid)
             print("score")
             print(maxv)
@@ -192,14 +195,26 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         return min(turns, key=itemgetter(0))[1]
     
     def _update_game_state(self):
-        if self.pacbot.pos != (self.state.pacman.x, self.state.pacman.y):
+        if(self.pacbot.pos != (self.state.pacman.x, self.state.pacman.y)):
+            self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
+            print("pre update score")
+            print(self.gameState.score)
             self.gameState.next_step()
-        self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
-        self.gameState.red.pos['current'] = (self.state.red_ghost.x, self.state.red_ghost.y)
-        self.gameState.pink.pos['current'] = (self.state.pink_ghost.x, self.state.pink_ghost.y)
-        self.gameState.orange.pos['current'] = (self.state.orange_ghost.x, self.state.orange_ghost.y)
-        self.gameState.blue.pos['current'] = (self.state.blue_ghost.x, self.state.blue_ghost.y)
-
+            print("post update score")
+            print(self.gameState.score)
+        if self.gameState.red.pos["current"] != (self.state.red_ghost.x, self.state.red_ghost.y) \
+                or self.gameState.blue.pos["current"] != (self.state.blue_ghost.x, self.state.blue_ghost.y) \
+                or self.gameState.pink.pos["current"] != (self.state.pink_ghost.x, self.state.pink_ghost.y) \
+                or self.gameState.orange.pos["current"] != (self.state.orange_ghost.x, self.state.orange_ghost.y):
+            self.gameState.red.pos["next"] = (self.state.red_ghost.x, self.state.red_ghost.y)
+            self.gameState.blue.pos["next"] = (self.state.blue_ghost.x, self.state.blue_ghost.y)
+            self.gameState.pink.pos["next"] = (self.state.pink_ghost.x, self.state.pink_ghost.y)
+            self.gameState.orange.pos["next"] = (self.state.orange_ghost.x, self.state.orange_ghost.y)
+            self.gameState._update_ghosts()
+        #self.gameState.red.pos['current'] = (self.state.red_ghost.x, self.state.red_ghost.y)
+        #self.gameState.pink.pos['current'] = (self.state.pink_ghost.x, self.state.pink_ghost.y)
+        #self.gameState.orange.pos['current'] = (self.state.orange_ghost.x, self.state.orange_ghost.y)
+        #self.gameState.blue.pos['current'] = (self.state.blue_ghost.x, self.state.blue_ghost.y)
         #figure out how to update other ghost values and gamestate values
 
         if self.gameState.grid[self.pacbot.pos[0]][self.pacbot.pos[1]] in [o, O]:
@@ -253,8 +268,6 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         #eval_val += min_dist * 1.5
         #print("min dist")
         #print(min_dist)
-        if min_dist < 2:
-            eval_val -= 100
         #if(gameState.state != frightened):
             #eval_val -= avg_dist
         #eval_val += gameState.power_pellets*4
@@ -266,6 +279,9 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         #print(dist_to_pellet)
         eval_val -= dist_to_pellet * 2
         return eval_val
+
+    def evaluate_move(self, gameState, depth):
+        return 0
 
     def _find_distance_of_closest_pellet(self, gameState):
         return len(bfs(gameState.grid, gameState.pacbot.pos, [o])) - 1
