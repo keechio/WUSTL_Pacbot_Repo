@@ -29,6 +29,7 @@ import asyncio
 i2c = board.I2C()  # uses board.SCL and board.SDA
 
 # Create the TCA9548A object and give it the I2C bus
+#address: 70
 tca = adafruit_tca9548a.TCA9548A(i2c)
 
 # For each sensor, create it using the TCA9548A channel instead of the I2C object
@@ -37,7 +38,7 @@ dis1 = adafruit_vl53l0x.VL53L0X(tca[1])
 dis2 = adafruit_vl53l0x.VL53L0X(tca[2])
 
 dis3 = adafruit_vl53l0x.VL53L0X(tca[3])
-# dis4 = adafruit_vl53l0x.VL53L0X(tca[4])
+dis4 = adafruit_vl53l0x.VL53L0X(tca[4])
 dis5 = adafruit_vl53l0x.VL53L0X(tca[5])
 
 gyro = Gyro()
