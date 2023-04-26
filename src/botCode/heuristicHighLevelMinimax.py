@@ -70,16 +70,20 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                                      #self.gameState.orange.respawn_counter, self.gameState.blue.respawn_counter]
             #prev_frightened_counters = [self.gameState.red.frightened_counter, self.gameState.pink.respawn_counter,
                                         #self.gameState.orange.respawn_counter, self.gameState.blue.respawn_counter]
+            move_val = self.minValAB(new_gameState, depth, alpha, beta, eval_score, move_list)
+            if(move_val > v):
+                v = move_val
+                best_move = move
             v = max(v, self.minValAB(new_gameState, depth, alpha, beta, eval_score))
             #self.gameState.red.undo_move(prev_pos[0], prev_respawn_counters[0], prev_frightened_counters[0])
             #self.gameState.pink.undo_move(prev_pos[1], prev_respawn_counters[1], prev_frightened_counters[1])
             #self.gameState.orange.undo_move(prev_pos[2], prev_respawn_counters[2], prev_frightened_counters[2])
             #self.gameState.blue.undo_move(prev_pos[3], prev_respawn_counters[3], prev_frightened_counters[3])
             if v >= beta:
-                return v
+                return v, best_move
             alpha = max(alpha, v)
             #new_gameState.pacbot.pos = old_pac_pos
-        return v
+        return v, best_move
 
 
     """
@@ -87,7 +91,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     makes each ghost move according to algorithm then calls max step
     returns score if it hits a ghost
     """
-    def minValAB(self, gameState, depth, alpha, beta, eval_score):
+    def minValAB(self, gameState, depth, alpha, beta, eval_score, move_list):
         v = float('inf')
         #print("pre")
         #print(gameState.red.pos['current'])
@@ -99,7 +103,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             return gameState.score + self.get_eval_val(gameState) - 1000
         #prev_game_state_arr = self.gameState.return_instance_variables()
         #prev_grid = copy.deepcopy(self.gameState.grid)
-        v = self.maxValAB(gameState, depth + 1, alpha, beta, eval_score)
+        v, best_move = self.maxValAB(gameState, depth + 1, alpha, beta, eval_score)
+        move_list.extend(best_move)
         #self.gameState.undo_step(prev_game_state_arr, prev_grid)
         if v <= alpha:
             return v
@@ -127,8 +132,9 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         #print(self.gameState.blue.pos['current'])
         #print(self.gameState.orange.pos['current'])
         #print(self.gameState.pink.pos['current'])
+        best_move_list = ()
         for move in moves:
-
+            move_list = ()
             print("pacbot pos")
             print(self.pacbot.pos)
             print("pacbot target")
@@ -162,15 +168,17 @@ class HeuristicHighLevelModule(rm.ProtoModule):
             else:
                 #prev_game_state_arr = self.gameState.return_instance_variables()
                 #prev_grid = copy.deepcopy(self.gameState.grid)
-                maxv = self.minValAB(new_gamestate, 1, float('-inf'), float('inf')
+                maxv = self.minValAB(new_gamestate, 1, float('-inf'), float('inf', move_list)
                                      , self.evaluate_move(new_gamestate, 0))
                 #self.gameState.undo_step(prev_game_state_arr, prev_grid)
             print("score")
             print(maxv)
             if maxv > returning:
+                best_move_list = move_list
                 best_action = move
                 returning = maxv
             #self.gameState.pacbot.pos = old_pac_pos
+        print(best_move_list)
         return best_action
 
     def _target_is_invalid(self, target_loc):
