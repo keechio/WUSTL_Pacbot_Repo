@@ -39,6 +39,21 @@ class HighLevelGhostAgent:
             possible.append(self.pos["current"])
         return possible
 
+    def _find_possible_moves_cur(self):
+        (x, y) = self.pos['current']
+        possible = []
+        if self._is_move_legal((x+1, y)):
+            possible.append((x+1, y))
+        if self._is_move_legal((x, y+1)) and (x, y) not in ghost_no_up_tiles:
+            possible.append((x, y+1))
+        if self._is_move_legal((x-1, y)):
+            possible.append((x-1, y))
+        if self._is_move_legal((x, y-1)):
+            possible.append((x, y-1))
+        if possible == []:
+            possible.append(self.pos["current"])
+        return possible
+
     # Returns the direction of the ghost based on its previous coordinates.
     def _get_direction(self, pos_prev, pos_new):
         if pos_new[0] > pos_prev[0]:
@@ -189,7 +204,33 @@ class HighLevelGhostAgent:
     def update(self):
         if self.frightened_counter > 0:
             self.frightened_counter -= 1
+        #if(self.color == 1):
+            #print("in update")
+            #print(self.pos['current'])
+            #print(self.pos['next'])
+            #print(self.pos['next'] not in self._find_possible_moves_cur())
+            #print(self._find_possible_moves_cur())
+        #available_moves = self._find_possible_moves_cur()
+        #if self.pos['next'] not in available_moves:
+        #    if(self.direction == up and (self.pos['current'][0], self.pos['current'][1]+1) in available_moves):
+        #        self.pos['next'] = (self.pos['current'][0], self.pos['current'][1]+1)
+        #    elif (self.direction == down and (self.pos['current'][0], self.pos['current'][1]-1) in available_moves):
+        #        self.pos['next'] = (self.pos['current'][0], self.pos['current'][1]-1)
+        #    elif (self.direction == left and (self.pos['current'][0]-1, self.pos['current'][1]) in available_moves):
+        #        self.pos['next'] = (self.pos['current'][0]-1, self.pos['current'][1])
+        #    elif (self.direction == right and (self.pos['current'][0]+1, self.pos['current'][1]+1) in available_moves):
+        #        self.pos['next'] = (self.pos['current'][0]+1, self.pos['current'][1])
+        #    else:
+        #        self.pos['next'] = self._find_possible_moves_cur()[0]
+        #if (self.color == 1):
+            #print("post change update")
+            #print(self.pos['current'])
+            #print(self.pos['next'])
         next_moves = self._decide_next_moves()
+        #if (self.color == 1):
+            #print("post next move update")
+            #print(self.pos['current'])
+            #print(self.pos['next'])
         self.pos['current'] = self.pos['next']
         self.pos['next'] = next_moves[0]
         self.direction = next_moves[1]
