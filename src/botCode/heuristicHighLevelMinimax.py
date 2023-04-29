@@ -52,7 +52,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
 
     def maxValAB(self, gameState, depth, alpha, beta, eval_score):
         if depth > MAX_DEPTH:
-            return gameState.score + self.get_eval_val(gameState)
+            return gameState.score + self.get_eval_val(gameState) + eval_score
         v = float('-inf')
         prev_loc = gameState.pacbot.pos
         state = [(prev_loc[0] - 1, prev_loc[1]),
@@ -63,7 +63,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         for move in moves:
             #old_pac_pos = self.pacbot.pos
             new_gameState = copy.deepcopy(gameState)
-            new_gameState.pacbot.pos = move
+            new_gameState.pacbot.update(move)
+            #new_gameState.pacbot.pos = move
             #prev_pos = [copy.deepcopy(self.gameState.red.pos), copy.deepcopy(self.gameState.pink.pos),
                         #copy.deepcopy(self.gameState.orange.pos), copy.deepcopy(self.gameState.blue.pos)]
             #prev_respawn_counters = [self.gameState.red.respawn_counter, self.gameState.pink.respawn_counter,
@@ -92,14 +93,14 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         #print("pre")
         #print(gameState.red.pos['current'])
         if gameState.next_step():
-            return gameState.score + self.get_eval_val(gameState)
+            return gameState.score + self.get_eval_val(gameState) + eval_score
         #print("post")
         #print(gameState.red.pos['current'])
         if gameState._should_die():
-            return gameState.score + self.get_eval_val(gameState) - 1000
+            return gameState.score + self.get_eval_val(gameState) - 1000 + eval_score
         #prev_game_state_arr = self.gameState.return_instance_variables()
         #prev_grid = copy.deepcopy(self.gameState.grid)
-        v = self.maxValAB(gameState, depth + 1, alpha, beta, eval_score)
+        v = self.maxValAB(gameState, depth + 1, alpha, beta, eval_score + self.evaluate_move(gameState, depth))
         #self.gameState.undo_step(prev_game_state_arr, prev_grid)
         if v <= alpha:
             return v
@@ -111,6 +112,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     """
 
     def minMaxActionAB(self):
+        print("pacbot direction")
+        print(self.pacbot.direction)
         # state gives a list of actions
         # if (game ended):
         # return
@@ -148,7 +151,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
 
             #old_pac_pos = self.pacbot.pos
             new_gamestate = copy.deepcopy(self.gameState)
-            new_gamestate.pacbot.pos = move
+            new_gamestate.pacbot.update(move)
+            #new_gamestate.pacbot.pos = move
             #print('ghost state pos')
             #print((self.state.pink_ghost.x,self.state.pink_ghost.y))
             #print('current pos')
@@ -163,7 +167,7 @@ class HeuristicHighLevelModule(rm.ProtoModule):
                 #prev_game_state_arr = self.gameState.return_instance_variables()
                 #prev_grid = copy.deepcopy(self.gameState.grid)
                 maxv = self.minValAB(new_gamestate, 1, float('-inf'), float('inf')
-                                     , self.evaluate_move(new_gamestate, 0))
+                                     , 0)
                 #self.gameState.undo_step(prev_game_state_arr, prev_grid)
             #print("score")
             #print(maxv)
@@ -196,7 +200,8 @@ class HeuristicHighLevelModule(rm.ProtoModule):
     
     def _update_game_state(self):
         if(self.pacbot.pos != (self.state.pacman.x, self.state.pacman.y)):
-            self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
+            self.pacbot.update((self.state.pacman.x, self.state.pacman.y))
+            #self.pacbot.pos = (self.state.pacman.x, self.state.pacman.y)
             print("pre update score")
             print(self.gameState.score)
             self.gameState.next_step()
@@ -281,7 +286,23 @@ class HeuristicHighLevelModule(rm.ProtoModule):
         return eval_val
 
     def evaluate_move(self, gameState, depth):
-        return 0
+        eval_val = 0
+        if(depth == 1 and gameState.pacbot.pos == self.previous_loc):
+            eval_val -= 30
+        if (depth == 1 and self._find_distance_of_closest_pellet(gameState) < 2):
+            eval_val += 30
+        if((self.manhattan_distance(gameState.pacbot.pos, gameState.red.pos['current']) < 3 and
+                gameState.red.frightened_counter == 0) or
+                (self.manhattan_distance(gameState.pacbot.pos, gameState.blue.pos['current']) < 3 and
+                 gameState.blue.frightened_counter == 0) or
+                (self.manhattan_distance(gameState.pacbot.pos, gameState.pink.pos['current']) < 3 and
+                 gameState.pink.frightened_counter == 0) or
+                (self.manhattan_distance(gameState.pacbot.pos, gameState.orange.pos['current']) < 3 and
+                 gameState.orange.frightened_counter == 0)):
+            eval_val -= 50
+        if(gameState.pacbot.direction != gameState.pacbot.prev_direction):
+            eval_val -= 30
+        return eval_val
 
     def _find_distance_of_closest_pellet(self, gameState):
         return len(bfs(gameState.grid, gameState.pacbot.pos, [o])) - 1
