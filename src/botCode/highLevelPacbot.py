@@ -9,6 +9,7 @@ class HighLevelPacBot:
     def __init__(self):
         self.pos = pacbot_starting_pos
         self.direction = pacbot_starting_dir
+        self.prev_direction = pacbot_starting_dir
         # self.respawn()
 
     def respawn(self):
